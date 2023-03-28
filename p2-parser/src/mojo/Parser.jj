@@ -1,0 +1,815 @@
+/* Copyright (C) 1997-2023, Antony L Hosking.
+ * All rights reserved.  */
+
+options {
+  DEBUG_PARSER = false;
+  DEBUG_LOOKAHEAD = false;
+  DEBUG_TOKEN_MANAGER = false;
+  STATIC = false;
+  JDK_VERSION = "1.9";
+}
+PARSER_BEGIN(Parser)
+package mojo.parse;
+import mojo.Absyn;
+import java.util.*;
+import java.util.regex.Pattern;
+import java.math.BigInteger;
+import java.util.stream.Collectors;
+import static mojo.Absyn.*;
+public class Parser {
+  private static void usage() {
+    throw new java.lang.Error("Usage: java mojo.Parser <source>");
+  }
+  public static void main (String[] args) {
+    if (args.length != 1) usage();
+    java.io.File file = new java.io.File(args[0]);
+    try {
+      new Parser(file).Unit();
+    } catch (java.io.FileNotFoundException e) {
+      System.err.println("File not found:" + file.getName());
+    } catch (ParseException e) {
+      System.err.println(e.getMessage());
+    } catch (TokenMgrError e) {
+      System.err.println(e.getMessage());
+    }
+  }
+  public String unitName = "Main";
+  public Parser(java.io.File file) throws java.io.FileNotFoundException {
+    this(new java.io.FileInputStream(file));
+    String fileName = file.getName();
+    if (fileName.endsWith(".mj"))
+      unitName = fileName.substring(0, fileName.lastIndexOf(".mj"));
+  }
+}
+PARSER_END(Parser)
+
+/**************************************************
+ * The lexical spec starts here                   *
+ **************************************************/
+TOKEN_MGR_DECLS : {
+    static int comment;
+    int pragma;
+    public static void main(String[] args) {
+    SimpleCharStream stream = new SimpleCharStream(System.in);
+    ParserTokenManager scanner = new ParserTokenManager(stream);
+    while (true) {
+        try {
+            Token token = scanner.getNextToken();
+            for (Token t = token.specialToken; t != null; t = t.specialToken) {
+                System.out.println(tokenImage[t.kind] + " " + t);
+            }
+            if (token.kind == EOF) {
+                if (comment > 0) {
+                    throw new TokenMgrError();
+                }
+                break;
+            }
+            System.out.println(tokenImage[token.kind] + " " + token);
+        } catch (TokenMgrError e) {
+            System.out.println("!ERROR");
+            System.err.println(e.getMessage());
+            System.exit(-1);
+            }
+        }
+    }
+}
+
+/* WHITE SPACE */
+SKIP : { " " | "\t" | "\n" | "\r" | "\13" | "\f" }
+
+/* KEYWORDS */
+TOKEN : {
+    <BREAK: "break"> | <CLASS: "class"> | <CONST: "const"> | <ELSE: "else"> | <EXTENDS: "extends"> | <FOR: "for">
+    | <IF: "if"> | <LOOP: "loop"> | <METHOD: "method"> | <OVERRIDE: "override"> | <PROC: "proc"> | <RETURN: "return">
+    | <STRUCT: "struct"> | <TYPE: "type"> | <UNTIL: "until"> | <VAL: "val"> | <VAR: "var"> | <WHILE: "while"> | <DEF: "def">
+    | <OBJECT: "object"> | <BY: "by">
+}
+
+/* OPERATORS */
+TOKEN : {
+    <LOGICAL_OR: "||"> | <LT: "<">  | <LTE: "<="> | <PLUS: "+"> | <MINUS: "-"> | <LBRACE: "{"> | <RBRACE: "}"> | <SEMI_COLON: ";"> | <COMMA: ",">
+    | <LOGICAL_AND: "&&"> | <GT: ">">  | <GTE: ">="> | <STAR: "*"> | <FWD_SLASH: "/"> | <LPAREN: "("> | <RPAREN: ")"> | <COLON: ":"> | <PERIOD: ".">
+    | <EQ: "=="> | <EXCL_POINT: "!">  | <NEQ: "!="> | <ELLIPSES: ".."> | <MODULO: "%"> | <LBRACK: "["> | <RBRACK: "]"> | <WALRUS: ":="> | <ASSIGN: "="> | <CARET: "^">
+}
+
+SKIP : {
+    "/*" { comment = 1; } : COMMENT
+}
+
+<COMMENT> SKIP : {
+    "/*" { comment += 1; }
+    | "*/" {
+        comment -= 1;
+        SwitchTo ( comment == 0 ? DEFAULT : COMMENT ) ;
+    }
+    | < ~[] >
+}
+
+TOKEN: {
+    <ID: <LETTER> (<LETTER> | <DIGIT> | "_")*>
+    | <#LETTER: ["a"-"z","A"-"Z"]>
+}
+
+TOKEN: {
+    // Numbers
+    <NUMBER: (<DIGIT>)+ ("_" <HEX_DIGIT> (<HEX_DIGIT>)*)?>
+    | <#DIGIT: ["0"-"9"]>
+    | <#HEX_DIGIT: <DIGIT> | ["a"-"f","A"-"F"]>
+    | <#OCTAL_DIGIT: ["0"-"7"]>
+}
+
+TOKEN: {
+    <CHAR: "'" (<PRINTING_CHAR> | <ESCAPE> | "\"") "'">
+    | <TEXT: "\"" (<PRINTING_CHAR> | <ESCAPE> | "\"")* "\"" >
+    | <#ESCAPE: "\\" ["a","b","f","n","r","t","v","\\","'","\""]
+                | "\\" ("0" | "1" | "2" | "3") <OCTAL_DIGIT> <OCTAL_DIGIT>
+                | "\\x" <HEX_DIGIT> <HEX_DIGIT>
+                | "\\u" <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT>
+                | "\\U" <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT> <HEX_DIGIT>>
+    | <#PRINTING_CHAR: <LETTER> | <DIGIT> | <OTHER_CHAR>>
+    | <#OTHER_CHAR: " " | "!" | "#" | "$" | "%" | "&" | "(" | ")"
+                    | "*" | "+" | "," | "-" | "." | "/" | ":" | ";"
+                    | "<" | "=" | ">" | "?" | "@" | "[" | "]" | "^"
+                    | "_" | "`" | "{" | "|" | "}" | "~">
+}
+
+/**************************************************
+ * TODO: Complete the grammar, and build AST      *
+ **************************************************/
+
+Value.Unit Unit():
+{
+    List<Value> tempDecls;
+    List<Value> decls = new LinkedList<>();
+    Stmt.Block block = null;
+} {
+    (tempDecls = Decl() {
+        decls.addAll(tempDecls);
+    })*
+    [block = Block()] <EOF>
+    { return new Value.Unit(ID(unitName), decls, block); }
+}
+
+
+Stmt.Block Block(): {
+    Token token;
+    List<Value> tempDecls;
+    List<Value> decls = new LinkedList<>();
+    Stmt stmt;
+    List<Stmt> stmts = new LinkedList<>();
+} {
+    token = <LBRACE>
+    (tempDecls = Decl() {
+        decls.addAll(tempDecls);
+    })*
+    (stmt = Stmt() {
+        stmts.add(stmt);
+    })*
+    <RBRACE>
+    { return new Stmt.Block(token, decls, stmts); }
+}
+
+// ==== DECLARATIONS ====
+
+List<Value> Decl(): {
+    List<Value> temp;
+    List<Value> value = new ArrayList<>();
+} {
+    (
+        (<CONST> (LOOKAHEAD(3) temp = ConstDecl() <SEMI_COLON> { value.addAll(temp); })+)
+        | (<TYPE> (LOOKAHEAD(2) temp = TypeDecl() <SEMI_COLON> { value.addAll(temp); })+)
+        | (<VAR> (LOOKAHEAD(3) temp = VarDecl() <SEMI_COLON> { value.addAll(temp); })+)
+        | (<DEF> value = ProcDecl())
+    )
+    { return value; }
+}
+
+List<Value> ConstDecl(): {
+    Token id;
+    Type type = null;
+    Expr constExpr;
+} {
+    id = <ID>
+    [<COLON> type = Type()]
+    <ASSIGN>
+    constExpr = ConstExpr()
+    { return List.of(new Value.Const(id, type, constExpr)); }
+}
+
+List<Value> TypeDecl(): {
+    Token id;
+    Type type;
+}{
+    id = <ID>
+    <ASSIGN>
+    type = Type()
+    { return List.of(new Value.Tipe(id, type)); }
+}
+
+List<Value> VarDecl(): {
+    List<Token> ids;
+    Type type = null;
+    Expr expr = null;
+} {
+    ids = IdList()
+    (
+        LOOKAHEAD(<COLON> Type() <WALRUS> Expr())
+        <COLON> type = Type() <WALRUS> expr = Expr()
+        | <COLON> type = Type()
+        | <WALRUS> expr = Expr()
+    )
+    {
+        List<Value> variables = new ArrayList<>();
+        for (Token id : ids) {
+            variables.add(new Value.Variable(id, type, expr));
+        }
+        return variables;
+    }
+}
+
+List<Value> ProcDecl(): {
+    Token id;
+    Type.Proc signature;
+    Stmt.Block block = null;
+} {
+    id = <ID>
+    signature = Signature()
+    (block = Block() | <SEMI_COLON>)
+    { return List.of(new Value.Procedure(id, signature, block)); }
+}
+
+// ==== PROCEDURE ====
+
+Type.Proc Signature(): {
+    Token token;
+    List<Value.Formal> formals;
+    Type type = null;
+}{
+    token = <LPAREN>
+    formals = Formals()
+    <RPAREN>
+    [LOOKAHEAD(2) <COLON> type = Type()]
+    { return new Type.Proc(token, formals, type); }
+}
+
+List<Value.Formal> Formals(): {
+    List<Value.Formal> temp;
+    List<Value.Formal> formals = new ArrayList<>();
+}{
+    [
+        temp = Formal() { formals.addAll(temp); }
+        (LOOKAHEAD(2) <SEMI_COLON> temp = Formal() { formals.addAll(temp); })*
+        [LOOKAHEAD(2) <SEMI_COLON>]
+    ]
+    { return formals; }
+}
+
+List<Value.Formal> Formal(): {
+    Token kind = null;
+    List<Token> ids;
+    Type type;
+}{
+    [kind = <VAL> | kind = <VAR>]
+    ids = IdList()
+    <COLON>
+    type = Type()
+    {
+        final Value.Formal.Mode mode;
+        if (kind == null) {
+            mode = Value.Formal.Mode.VALUE;
+        } else {
+            switch (kind.image.toUpperCase()) {
+                case "VAL":
+                    mode = Value.Formal.Mode.VALUE;
+                    break;
+                case "VAR":
+                    mode = Value.Formal.Mode.VAR;
+                    break;
+                default:
+                    mode = Value.Formal.Mode.READONLY;
+            }
+        }
+        List<Value.Formal> formals = new ArrayList<>();
+        for (Token id : ids) {
+            formals.add(new Value.Formal(id, mode, type));
+        }
+        return formals;
+    }
+}
+
+// ==== STATEMENTS ====
+
+Stmt Stmt(): {
+    Stmt stmt = null;
+} {
+    (
+        LOOKAHEAD(Expr() <WALRUS>) stmt = AssignSt()
+        | stmt = Block()
+        | stmt = BreakSt()
+        | stmt = CallSt()
+        | stmt = ForSt()
+        | stmt = IfSt()
+        | stmt = LoopSt()
+        | stmt = ReturnSt()
+    )
+    { return stmt; }
+}
+
+Stmt.Assign AssignSt(): {
+    Token token;
+    Expr lhs;
+    Expr rhs;
+}{
+    lhs = Expr()
+    token = <WALRUS>
+    rhs = Expr()
+    <SEMI_COLON>
+    { return new Stmt.Assign(token, lhs, rhs); }
+}
+
+Stmt.Break BreakSt(): {
+    Token token;
+}{
+    token = <BREAK>
+    <SEMI_COLON>
+    { return new Stmt.Break(token); }
+}
+
+Stmt.Call CallSt(): {
+    Token token = null;
+    Expr call;
+}{
+    call = Expr()
+    <SEMI_COLON>
+    {
+        if (!(call instanceof Expr.Call)) {
+            throw new ParseException("Expected Expr.Call, got " + call.getClass().getName());
+        }
+        return new Stmt.Call(token, (Expr.Call) call);
+    }
+}
+
+Expr Actual(): {
+    Type type = null;
+    Expr expr = null;
+}{
+    (
+        LOOKAHEAD(Expr()) expr = Expr() | type = Type()
+    )
+    { return type != null ? new Expr.TypeExpr(type) : expr; }
+}
+
+Stmt.For ForSt(): {
+    Token token;
+    Token id;
+    Expr from;
+    Expr to;
+    Expr by = null;
+    Stmt.Block block;
+}{
+    token = <FOR>
+    id = <ID>
+    <WALRUS>
+    from = Expr()
+    <ELLIPSES>
+    to = Expr()
+    [<BY> by = Expr()]
+    block = Block()
+    {
+        return new Stmt.For(
+                token,
+                id,
+                from,
+                to,
+                by,
+                block
+        );
+    }
+}
+
+Stmt.If IfSt(): {
+    Token token;
+    Expr condition;
+    Stmt.Block block;
+    Stmt branch = null;
+}{
+    token = <IF>
+    condition = Expr()
+    block = Block()
+    [<ELSE> (LOOKAHEAD(2) branch = IfSt() | LOOKAHEAD(2) branch = Block())]
+    {
+        return new Stmt.If(
+                token,
+                condition,
+                block,
+                branch
+        );
+    }
+}
+
+Stmt.Loop LoopSt(): {
+    Token token;
+    Expr whileCondition = null;
+    Stmt.Block body;
+    Expr untilCondition = null;
+}{
+    token = <LOOP>
+    [<WHILE> whileCondition = Expr()]
+    body = Block()
+    [<UNTIL> untilCondition = Expr() <SEMI_COLON>]
+    {
+        return new Stmt.Loop(
+                token,
+                whileCondition,
+                body,
+                untilCondition
+        );
+    }
+}
+
+Stmt.Return ReturnSt(): {
+    Token token;
+    Expr returnValue = null;
+}{
+    token = <RETURN>
+    [returnValue = Expr()]
+    <SEMI_COLON>
+    { return new Stmt.Return(token, returnValue); }
+}
+
+// ==== TYPES ====
+
+Type Type(): {
+    Type type = null;
+}{
+    (
+        LOOKAHEAD(ObjectType()) type = ObjectType()
+        | type = RecordType()
+        | type = TypeName()
+        | type = ArrayType()
+        | type = RefType()
+    )
+    { return type; }
+}
+
+Type.Named TypeName(): {
+    Token id;
+}{
+    id = <ID>
+    { return new Type.Named(id); }
+}
+
+Type.Array ArrayType(): {
+    Token token;
+    Expr number = null;
+    Type element;
+}{
+    token = <LBRACK>
+    [number = Expr()]
+    <RBRACK>
+    element = Type()
+    { return new Type.Array(token, number, element); }
+}
+
+Type.Record RecordType(): {
+    Token token = null;
+    List<Value.Field> tempFields;
+    List<Value.Field> fields = new ArrayList<>();
+    Type.Record instance;
+}{
+    token = <LPAREN> { instance = new Type.Record(token, fields); }
+    tempFields = Fields(instance) { fields.addAll(tempFields); }
+    <RPAREN>
+    { return instance; }
+}
+
+Type.Ref RefType(): {
+    Token token;
+    Type target;
+}{
+    token = <CARET>
+    target = Type()
+    { return new Type.Ref(token, target); }
+}
+
+Type.Object ObjectType(): {
+    Token token = null;
+    Type instance = null;
+    List<Value.Field> fieldsTemp;
+    List<Value.Field> fields;
+    Value.Method methodTemp;
+    List<Value.Method> methods;
+    Value.Method overrideTemp;
+    List<Value.Method> overrides;
+}{
+    [instance = TypeName() ]
+    (
+        token = <OBJECT> {
+            fields = new ArrayList<>();
+            methods = new ArrayList<>();
+            overrides = new ArrayList<>();
+            instance = new Type.Object(
+                    token,
+                    instance,
+                    fields,
+                    methods,
+                    overrides
+            );
+        }
+        <LBRACE>
+        [
+            (
+                LOOKAHEAD(2) (fieldsTemp = Field(instance) { fields.addAll(fieldsTemp); })
+                | LOOKAHEAD(2) (methodTemp = Method((Type.Object) instance) { methods.add(methodTemp); })
+                | LOOKAHEAD(2) (overrideTemp = Override((Type.Object) instance) { overrides.add(overrideTemp); })
+            )
+            (
+                LOOKAHEAD(2)
+                <SEMI_COLON>
+                (
+                    LOOKAHEAD(2) (fieldsTemp = Field(instance) { fields.addAll(fieldsTemp); })
+                    | LOOKAHEAD(2) (methodTemp = Method((Type.Object) instance) { methods.add(methodTemp); })
+                    | LOOKAHEAD(2) (overrideTemp = Override((Type.Object) instance) { overrides.add(overrideTemp); })
+                )
+            )*
+            [<SEMI_COLON>]
+        ]
+        <RBRACE>
+    )+
+    { return (Type.Object) instance; }
+}
+
+List<Value.Field> Fields(Type parent): {
+    List<Value.Field> tempFields;
+    List<Value.Field> fields = new ArrayList<>();
+}{
+    [
+        (tempFields = Field(parent) { fields.addAll(tempFields); })
+        (LOOKAHEAD(2) <SEMI_COLON> tempFields = Field(parent) { fields.addAll(tempFields); })*
+        [<SEMI_COLON>]
+    ]
+    { return fields; }
+}
+
+List<Value.Field> Field(Type parent): {
+    List<Token> ids;
+    Type type;
+}{
+    ids = IdList()
+    <COLON>
+    type = Type()
+    {
+        List<Value.Field> fields = new ArrayList<>();
+        for (Token id : ids) {
+            fields.add(new Value.Field(id, parent, type));
+        }
+        return fields;
+    }
+}
+
+Value.Method Method(Type.Object parent): {
+    Token id;
+    Type.Proc signature;
+    Expr constExpr = null;
+}{
+    id = <ID>
+    signature = Signature()
+    [<WALRUS> constExpr = ConstExpr()]
+    {
+        return new Value.Method(
+            id,
+            parent,
+            signature,
+            constExpr
+        );
+    }
+}
+
+Value.Method Override(Type.Object parent): {
+    Token id;
+    Expr constExpr;
+}{
+    id = <ID>
+    <WALRUS>
+    constExpr = ConstExpr()
+    { return new Value.Method(id, parent, null, constExpr); }
+}
+
+// ==== EXPRESSIONS ====
+
+Expr ConstExpr(): {
+    Expr expr;
+}{
+    expr = Expr()
+    { return expr; }
+}
+
+Expr Expr(): {
+    Token token;
+    Expr e1Lhs;
+    Expr e1Rhs;
+}{
+    e1Lhs = E1()
+    (token = <LOGICAL_OR> e1Rhs = E1() { e1Lhs = new Expr.Binary.Or(token, e1Lhs, e1Rhs); })*
+    { return e1Lhs; }
+}
+
+// Expression Alternations
+
+Expr E1(): {
+    Token token = null;
+    Expr e2Lhs;
+    Expr e2Rhs = null;
+}{
+    e2Lhs = E2()
+    (token = <LOGICAL_AND> e2Rhs = E2() { e2Lhs = new Expr.Binary.And(token, e2Lhs, e2Rhs); })*
+    { return e2Lhs; }
+}
+
+Expr E2(): {
+    Token token = null;
+    List<Token> exclPoints = new ArrayList<>();
+    Expr e3;
+}{
+    (token = <EXCL_POINT> { exclPoints.add(token); })*
+    e3 = E3()
+    {
+        if (exclPoints.isEmpty()) {
+            return e3;
+        }
+        Expr.Not negation = new Expr.Not(token, e3);
+        for (int i = 0; i < exclPoints.size() - 1; i++) {
+            negation = new Expr.Not(exclPoints.get(i), negation);
+        }
+        return negation;
+    }
+}
+
+Expr E3(): {
+    Token token = null;
+    Expr e4Lhs;
+    Expr e4Rhs;
+}{
+    e4Lhs = E4()
+    (
+        (token = <EQ> e4Rhs = E4() { e4Lhs = new Expr.Equal(token, e4Lhs, e4Rhs, Absyn.Expr.Equal.Op.EQ); })
+        | (token = <NEQ> e4Rhs = E4() { e4Lhs = new Expr.Equal(token, e4Lhs, e4Rhs, Absyn.Expr.Equal.Op.NE); })
+        | (token = <GT> e4Rhs = E4() { e4Lhs = new Expr.Compare(token, e4Lhs, e4Rhs, Absyn.Expr.Compare.Op.GT); })
+        | (token = <GTE> e4Rhs = E4() { e4Lhs = new Expr.Compare(token, e4Lhs, e4Rhs, Absyn.Expr.Compare.Op.GE); })
+        | (token = <LT> e4Rhs = E4() { e4Lhs = new Expr.Compare(token, e4Lhs, e4Rhs, Absyn.Expr.Binary.Compare.Op.LT); })
+        | (token = <LTE> e4Rhs = E4() { e4Lhs = new Expr.Compare(token, e4Lhs, e4Rhs, Absyn.Expr.Binary.Compare.Op.LE); })
+    )*
+    { return e4Lhs; }
+}
+
+Expr E4(): {
+    Token token = null;
+    Expr e5Lhs;
+    Expr e5Rhs;
+}{
+    e5Lhs = E5()
+    (
+        (token = <PLUS> e5Rhs = E5() { e5Lhs = new Expr.Add(token, e5Lhs, e5Rhs); })
+        | (token = <MINUS> e5Rhs = E5() { e5Lhs = new Expr.Sub(token, e5Lhs, e5Rhs); })
+    )*
+    { return e5Lhs; }
+}
+
+Expr E5(): {
+    Token token = null;
+    Expr e6Lhs;
+    Expr e6Rhs;
+}{
+    e6Lhs = E6()
+    (
+        (token = <STAR> e6Rhs = E6() { e6Lhs = new Expr.Mul(token, e6Lhs, e6Rhs); })
+        | (token = <FWD_SLASH> e6Rhs = E6() { e6Lhs = new Expr.Div(token, e6Lhs, e6Rhs); })
+        | (token = <MODULO> e6Rhs = E6() { e6Lhs = new Expr.Mod(token, e6Lhs, e6Rhs); })
+    )*
+    { return e6Lhs; }
+}
+
+Expr E6(): {
+    Token token = null;
+    List<Map.Entry<Token, Class<? extends Expr.Unary>>> unaryOps = new ArrayList<>();
+    Expr e7;
+}{
+    (
+        (token = <PLUS> { unaryOps.add(new AbstractMap.SimpleEntry<>(token, Expr.Pos.class)); })
+        | (token = <MINUS> { unaryOps.add(new AbstractMap.SimpleEntry<>(token, Expr.Neg.class)); })
+    )*
+    e7 = E7()
+    {
+        if (token == null) {
+            return e7;
+        }
+        Expr.Unary unary = null;
+        for (int i = unaryOps.size() - 1; i >=0; i--) {
+            Map.Entry<Token, Class<? extends Expr.Unary>> entry = unaryOps.get(i);
+            if (entry.getValue().equals(Expr.Pos.class)) {
+                unary = new Expr.Pos(entry.getKey(), unary == null ? e7 : unary);
+            } else {
+                unary = new Expr.Neg(entry.getKey(), unary == null ? e7 : unary);
+            }
+        }
+        return unary;
+    }
+}
+
+Expr E7(): {
+    Expr e8;
+}{
+    e8 = E8()
+    (LOOKAHEAD(2) e8 = Selector(e8))*
+    { return e8; }
+}
+
+Expr Selector(Expr e8): {
+    Token token;
+    Token id = null;
+    Expr expr = null;
+    List<Expr> args = new ArrayList<>();
+    Expr instance;
+}{
+    (
+        (token = <CARET> { instance = new Expr.Deref(token, e8); })
+        | (token = <PERIOD> id = <ID> { instance = new Expr.Qualify(token, e8, id); })
+        | (token = <LBRACK> expr = Expr() <RBRACK> { instance = new Expr.Subscript(token, e8, expr); })
+        | (
+            token = <LPAREN>
+            [
+                LOOKAHEAD(2)
+                expr = Actual() { args.add(expr); }
+                (<COMMA> expr = Actual() { args.add(expr); })*
+            ]
+            <RPAREN>
+            { instance = new Expr.Call(token, e8, args); }
+        )
+    )
+    { return instance; }
+}
+
+Expr E8(): {
+    Token token = null;
+    Expr instance = null;
+    Pattern hexLiteralPattern = Pattern.compile("^\\\\x|u|U");
+    Pattern extendedUnicodeLiteralPattern = Pattern.compile("^\\\\a|v");
+}{
+    (
+        (token = <ID> { instance = new Expr.Named(token); })
+        | (token = <NUMBER> {
+            String literal;
+            int radix;
+            if (token.image.contains("_")) {
+                String[] splitRadixLiteral = token.image.split("_");
+                literal = splitRadixLiteral[1];
+                radix = Integer.parseInt(splitRadixLiteral[0]);
+            } else {
+                literal = token.image;
+                radix = 10;
+            }
+            instance = new Expr.Int(
+                token,
+                new BigInteger(
+                    literal,
+                    radix
+                )
+            );
+        })
+        | (token = <CHAR> {
+            String literal = token.image;
+            literal = literal.substring(1, literal.length() - 1);
+            BigInteger value;
+            if (hexLiteralPattern.matcher(literal).find()) {
+                value = new BigInteger(literal.substring(2), 16);
+            } else if (extendedUnicodeLiteralPattern.matcher(literal).find()) {
+                value = BigInteger.valueOf(literal.equals("\\a") ? 7 : 11);
+            } else {
+                value = BigInteger.valueOf(literal.translateEscapes().charAt(0));
+            }
+            instance = new Expr.Int(
+                new Token(
+                    token.kind,
+                    value.toString(10)
+                ), value
+            );
+        }) | (token = <TEXT> {
+            final String image = token.image;
+            instance = new Expr.Text(token, image.substring(1, image.length() - 1));
+        }) | (token = <LPAREN> instance = Expr() <RPAREN>)
+    )
+    { return instance; }
+}
+
+// ==== MISC ====
+
+List<Token> IdList(): {
+    Token token;
+    List<Token> ids = new LinkedList<>();
+} {
+    token = <ID> { ids.add(token); }
+    ( <COMMA> token = <ID> {
+        ids.add(token);
+    })*
+    { return ids; }
+}

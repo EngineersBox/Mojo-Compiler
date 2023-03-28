@@ -1,0 +1,13 @@
+<<<<<<< HEAD
+/output/
+/.idea/
+/bin/
+||||||| 6477766
+=======
+bin
+lib
+output
+out
+.idea/
+*.iml
+>>>>>>> 7447f830a5bba817b54f6ece5d4c871afc9b2ad9
