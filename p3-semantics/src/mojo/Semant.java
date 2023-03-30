@@ -7,6 +7,7 @@ import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import mojo.parse.*;
 import static mojo.Absyn.*;
@@ -77,20 +78,23 @@ public class Semant {
     void Check(Value v) {
         class Visitor implements Value.Visitor<Void> {
             public Void visit(Value.Field v) {
-                // TODO: Check type, "fields must not be open arrays" [DONE]
-                final Type type = Check(v.type);
-                if (IsOpenArray(type) != null) {
-                    Error.ID(v.token, "fields must not be open arrays");
+                // TODO: Check type, "fields must may be open arrays" [DONE]
+                v.type = Check(v.type);
+                if (IsOpenArray(v.type) != null) {
+                    Error.ID(v.token, "fields may not be open arrays");
                 }
                 return null;
             }
             public Void visit(Value.Formal v) {
                 // TODO: Check type [DONE]
-                Check(v.type);
+                v.type = Check(v.type);
+                if ((v.refType = Check(v.refType)) == null) {
+                    v.refType = Type.Err.T;
+                }
                 return null;
             }
             public Void visit(Value.Method v) {
-                // TODO:
+                // TODO: [DONE]
                 // - Check and set sig
                 // - Check expression and resolve default
                 // - Check resulting value
@@ -103,6 +107,26 @@ public class Semant {
                 //     "default is incompatible with method type"
                 Check(v.sig);
                 Check(v.expr);
+                ResolveDefault(v);
+                Check(v.value);
+                if (v.value == null) {
+                    return null;
+                }
+                Check(v.value);
+                if (TypeOf(v.value) == Type.Null.T) {
+                    v.value = null;
+                    return null;
+                }
+                final Value.Procedure proc = Is(v.value, Value.Procedure.class);
+                if (proc == null) {
+                    Error.ID(v.token, "default is not a procedure");
+                }
+                if (IsNested(proc)) {
+                    Error.ID(v.token, "default is a nested procedure");
+                }
+                if (!IsCompatible((Type.Proc) TypeOf(proc), v.parent, (Type.Proc) TypeOf(v))) {
+                    Error.ID(v.token, "default is incompatible with method type");
+                }
                 return null;
             }
             public Void visit(Value.Procedure p) {
@@ -182,7 +206,7 @@ public class Semant {
                 return null;
             }
             public Void visit(Value.Const v) {
-                // TODO:
+                // TODO: [DONE]
                 // - Check expr
                 // - Check type
                 // - If procedure: "nested procedures are not constants"
@@ -191,6 +215,30 @@ public class Semant {
                 //   - check expr assignable to type
                 //   - compute constant from expr: "value is not a constant"
                 //   - set expr to constant
+                Check(v.expr);
+                v.type = Check(TypeOf(v));
+                final Type exprType = TypeOf(v.expr);
+                final Expr.Named procExpr = Is(v.expr, Expr.Named.class);
+                Check(procExpr);
+                final Value.Procedure proc = procExpr == null ? null : Is(procExpr.value, Value.Procedure.class);
+                Check(proc);
+                if (procExpr != null
+                    && proc != null
+                    && IsNested(proc)) {
+                    Error.ID(v.token, "nested procedures are not constants");
+                } else if (exprType == Type.Err.T) {
+                    Error.ID(v.token, "value is not a constant expression");
+                } else {
+                    if (!IsAssignable(v.type, exprType)) {
+                        return null;
+                    }
+                    v.type = exprType;
+                    final Expr constValue = ConstValue(v.expr);
+                    if (constValue == null) {
+                        Error.ID(v.token, "value is not a constant");
+                    }
+                    v.expr = constValue;
+                }
                 return null;
             }
             public Void visit(final Value.Unit t) {
@@ -215,7 +263,7 @@ public class Semant {
                 return null;
             }
             public Void visit(Value.Tipe v) {
-                // TODO: check and set value
+                // TODO: check and set value [DONE]
                 v.value = Check(v.value);
                 return null;
             }
@@ -239,13 +287,11 @@ public class Semant {
         class Visitor implements Value.Visitor<Type> {
             public Type visit(Value.Const v) {
                 // TODO: If type null set type to type of expr [DONE]
-                return v.type != null ? v.type : v.expr.type;
+                return v.type != null ? v.type : TypeOf(v.expr);
             }
             public Type visit(Value.Field v) {
                 // TODO: If type null set type to type of expr [DONE]
-                return v.type != null
-                        ? v.type
-                        : (v.expr != null ? v.expr.type : null);
+                return v.type != null ? v.type : TypeOf(v.expr);
             }
             public Type visit(Value.Variable v) {
                 // TODO: [DONE]
@@ -255,13 +301,16 @@ public class Semant {
                 // - if type us null: "variable has no type"
                 if (v.type != null) {
                     return v.type;
-                } else if (v.expr != null) {
-                    return v.expr.type;
-                } else if (v.formal != null) {
-                    return v.formal.type;
                 }
-                Error.ID(v.token, "variable has no type");
-                return null;
+                if (v.expr != null) {
+                    v.type = TypeOf(v.expr);
+                } else if (v.formal != null) {
+                    v.type = TypeOf(v.formal);
+                }
+                if (v.type == null) {
+                    Error.ID(v.token, "variable has no type");
+                }
+                return v.type;
             }
             public Type visit(Value.Formal v) { return v.type; }
             public Type visit(Value.Method v) { return v.sig; }
@@ -576,10 +625,10 @@ public class Semant {
                 t.overrideSize = t.overrides.size() * wordSize;
 
                 // TODO: build field and method scopes [DONE]
-                t.fieldScope = Scope.PushNewOpen();
+                t.fieldScope = Scope.PushNewClosed();
                 Scope.Insert(t.fields);
                 Scope.PopNew();
-                t.methodScope = Scope.PushNewOpen();
+                t.methodScope = Scope.PushNewClosed();
                 Scope.Insert(t.methods);
                 Scope.Insert(t.overrides);
                 Scope.PopNew();
@@ -617,9 +666,14 @@ public class Semant {
                     //   - if found then set override method sig and index to
                     //     those of parent method
                     //   - if not found "no method to override in supertype"
-                    for (final Value.Method method : t.methods) {
-                        if (!t.overrides.contains(method)) {
-                            method.index = 0; // What does this need to be?
+                    final List<Value.Method> methods = Stream.concat(
+                            t.methods.stream(),
+                            t.overrides.stream()
+                    ).toList();
+                    int index = 0;
+                    for (final Value.Method method : methods) {
+                        if (!method.override) {
+                            method.index = index++;
                             continue;
                         }
                         final Value parentMethodValue = Scope.LookUp(
@@ -633,6 +687,7 @@ public class Semant {
                         } else {
                             Error.ID(method.token, "no method to override in supertype");
                         }
+                        index++;
                     }
 
                     // check my fields and methods
@@ -666,22 +721,22 @@ public class Semant {
                     return null;
                 }
                 Check(t.number.type);
-                final Expr.Int number = Is(t.number, Expr.Int.class);
-                if (number == null || Is(t.number.type, Type.Err.class) != null) {
+                final Type.Int number = Is(t.number.type,Type.Int.class);
+                if (number == null && Is(t.number.type, Type.Err.class) == null) {
                     Error.ID(t.token, "array length must be an integer expression");
                 }
-                final Type type = Check(t.element);
-                if (number == null) {
+                t.element = Check(t.element);
+                final Expr constValue = ConstValue(t.number);
+                if (constValue == null) {
                     return null;
                 }
-                if (IsOpenArray(type) != null) {
-                    Error.ID(type.token, "array element type cannot be an open array");
+                if (IsOpenArray(t.element) != null) {
+                    Error.ID(t.element.token, "array element type cannot be an open array");
                 }
-                final BigInteger n = number.value;
-                if (n.bitCount() > Integer.SIZE) {
-                    Error.ID(number.token, "array type has too many elements");
-                }
-                if (n.signum() > -1
+                final BigInteger n = ((Expr.Int) constValue).value;
+                if (n.bitLength() > Integer.SIZE) {
+                    Error.ID(t.token, "array type has too many elements");
+                } else if (n.signum() > -1
                     && t.element.size > 0
                     && n.compareTo(BigInteger.valueOf(Integer.MAX_VALUE / t.element.size)) > 0) {
                     Error.ID(t.token, "array type is too large");
@@ -690,7 +745,7 @@ public class Semant {
                 return null;
             }
             public Void visit(Type.Proc t) {
-                // TODO: [WIP]
+                // TODO: [DONE]
                 // - push and set scope
                 // - insert formals
                 // - pop scope
@@ -702,6 +757,7 @@ public class Semant {
                 t.scope = Scope.PushNewClosed();
                 Scope.Insert(t.formals);
                 Scope.PopNew();
+                t.formals.forEach(Semant.this::Check);
                 recursionDepth++;
                 {
                     t.size = wordSize;
@@ -736,7 +792,7 @@ public class Semant {
                     field.offset = offset++;
                     size = size.add(BigInteger.valueOf(field.type.size));
                 }
-                if (size.bitCount() > Integer.SIZE) {
+                if (size.bitLength() > Integer.SIZE) {
                     Error.ID(t.token, "record type is too large");
                 }
                 t.size = size.intValue();
@@ -744,7 +800,12 @@ public class Semant {
             }
             public Void visit(Type.Ref t) {
                 t.size = wordSize;
-                // TODO: Check and set target (recursively)
+                // TODO: Check and set target (recursively) [DONE]
+                recursionDepth++;
+                {
+                    t.target = Check(t.target);
+                }
+                recursionDepth--;
                 return null;
             }
         }
@@ -1394,20 +1455,41 @@ public class Semant {
                 return null;
             }
             public Type visit(Stmt.If s) {
-                // TODO:
+                // TODO: [DONE]
                 // - check expr
                 // - if expr not boolean: "if condition must be a boolean"
                 // - check block
                 // - check statement
                 // - return null if ok Err.T otherwise
+                Check(s.expr);
+                if (Base(TypeOf(s.expr)) != Type.Bool.T) {
+                    Error.ID(s.token, "if condition must be a boolean");
+                }
+                if (Check(s.block, returnOK, returnType, s) != null
+                    || Check(s.stmt, returnOK, returnType, s) != null) {
+                    return Type.Err.T;
+                }
                 return null;
             }
             public Type visit(Stmt.Loop s) {
-                // TODO:
+                // TODO: [DONE]
                 // - check whileExpr
                 // - must be boolean: "loop while condition must be a boolean"
                 // - check block
                 // - check untilExpr: "loop until condition must be a boolean"
+                Check(s.whileExpr);
+                if (s.whileExpr != null && Base(TypeOf(s.whileExpr)) != Type.Bool.T) {
+                    Error.ID(s.token, "loop while condition must be a boolean");
+                    return Type.Err.T;
+                }
+                if (Check(s.block, returnOK, returnType, s) != null) {
+                    return Type.Err.T;
+                }
+                Check(s.untilExpr);
+                if (s.untilExpr != null && Base(TypeOf(s.untilExpr)) != Type.Bool.T) {
+                    Error.ID(s.token, "loop until condition must be a boolean");
+                    return Type.Err.T;
+                }
                 return null;
             }
             public Type visit(Stmt.Return s) {
@@ -1439,17 +1521,23 @@ public class Semant {
                 // - check stmts
                 // - pop scope
                 // - return type from checking block
-                s.scope = Scope.PushNewOpen();
-                Scope.Insert(s.decls);
-                Check(s.scope);
+                if (!s.decls.isEmpty()) {
+                    s.scope = Scope.PushNewOpen();
+                    Scope.Insert(s.decls);
+                    Check(s.scope);
+                }
                 final AtomicReference<Type> returnType = new AtomicReference<>();
-                s.body.forEach((final Stmt stmt) -> returnType.set(Check(
-                        stmt,
-                        returnOK,
-                        returnType.get(),
-                        null
-                )));
-                Scope.PopNew();
+                s.body.forEach((final Stmt stmt) -> {
+                    returnType.set(Check(
+                            stmt,
+                            returnOK,
+                            returnType.get(),
+                            null
+                    ));
+                });
+                if (!s.decls.isEmpty()) {
+                    Scope.PopNew();
+                }
                 return returnType.get();
             }
         }
@@ -1710,19 +1798,30 @@ public class Semant {
     void Check(Expr e) {
         class Visitor implements Expr.Visitor<Void> {
             public Void visit(Expr.Add e) {
-                // TODO
+                // TODO [DONE]
                 assert e.type != null;
                 Check(e.type);
                 Check(e.left);
-                e.
                 Check(e.right);
-                BadOperands(e, Type.Int.T, Type.Int.T);
+                if (Base(TypeOf(e.left)) != Type.Int.T
+                    || Base(TypeOf(e.right)) != Type.Int.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Address e) { assert e.type != null; return null; }
             public Void visit(Expr.And e) {
                 assert e.type != null;
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (Base(TypeOf(e.left)) != Type.Bool.T
+                    || Base(TypeOf(e.right)) != Type.Bool.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Bool.T;
                 return null;
             }
             public Void visit(Expr.Call ce) {
@@ -1891,21 +1990,54 @@ public class Semant {
                 return null;
             }
             public Void visit(Expr.Div e) {
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (Base(TypeOf(e.left)) != Type.Int.T
+                    || Base(TypeOf(e.right)) != Type.Int.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Equal e) {
                 assert e.type != null;
-                // TODO
+                // TODO [DONE]
                 // lhs and rhs must be assignable
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (!IsAssignable(TypeOf(e.left), TypeOf(e.right))) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Bool.T;
                 return null;
             }
             public Void visit(Expr.Compare e) {
                 assert e.type != null;
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                CheckOrdinal(e.token, TypeOf(e.left), e.right);
+                final Type lhst = Base(TypeOf(e.left));
+                final Type rhst = Base(TypeOf(e.right));
+                if (!(lhst == Type.Int.T && rhst == Type.Int.T)
+                    || !(lhst == Type.Bool.T && rhst == Type.Bool.T)) {
+                    BadOperands(e, lhst, rhst);
+                }
+                e.type = Type.Bool.T;
                 return null;
             }
             public Void visit(Expr.Neg e) {
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.expr);
+                if (Base(TypeOf(e.expr)) != Type.Int.T) {
+                    BadOperands(e, Type.Int.T, TypeOf(e.expr));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Method e) {
@@ -1915,11 +2047,27 @@ public class Semant {
                 return null;
             }
             public Void visit(Expr.Mod e) {
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (Base(TypeOf(e.left)) != Type.Int.T
+                    || Base(TypeOf(e.right)) != Type.Int.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Mul e) {
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (Base(TypeOf(e.left)) != Type.Int.T
+                    || Base(TypeOf(e.right)) != Type.Int.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Named e) {
@@ -1931,18 +2079,38 @@ public class Semant {
             }
             public Void visit(Expr.Not e) {
                 assert e.type != null;
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.expr);
+                if (Base(TypeOf(e.expr)) != Type.Bool.T) {
+                    BadOperands(e, Type.Bool.T, TypeOf(e.expr));
+                }
+                e.type = Type.Bool.T;
                 return null;
             }
             public Void visit(Expr.Int e) { assert e.type != null; return null; }
             public Void visit(Expr.Bool e) { assert e.type != null; return null; }
             public Void visit(Expr.Or e) {
                 assert e.type != null;
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (Base(TypeOf(e.left)) != Type.Bool.T
+                    || Base(TypeOf(e.right)) != Type.Bool.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Bool.T;
                 return null;
             }
             public Void visit(Expr.Pos e) {
-                // TODO
+                // TODO [DONE]
+                Check(e.type);
+                Check(e.expr);
+                if (Base(TypeOf(e.expr)) != Type.Int.T) {
+                    BadOperands(e, Type.Int.T, TypeOf(e.expr));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Proc e) {
@@ -2030,7 +2198,16 @@ public class Semant {
                 return null;
             }
             public Void visit(Expr.Sub e) {
-                // TODO
+                // TODO [DONE]
+                assert e.type != null;
+                Check(e.type);
+                Check(e.left);
+                Check(e.right);
+                if (Base(TypeOf(e.left)) != Type.Int.T
+                        || Base(TypeOf(e.right)) != Type.Int.T) {
+                    BadOperands(e, TypeOf(e.left), TypeOf(e.right));
+                }
+                e.type = Type.Int.T;
                 return null;
             }
             public Void visit(Expr.Text e) { assert e.type != null; return null; }
@@ -2067,17 +2244,14 @@ public class Semant {
     Expr ConstValue(Expr e) {
         class Visitor implements Expr.Visitor<Expr> {
             public Expr visit(Expr.Add e) {
-                // TODO
-                Check(e.type);
+                // TODO [DONE]
                 final Expr e1 = ConstValue(e.left);
                 final Expr e2 = ConstValue(e.right);
-                if (Base(TypeOf(e1)) != Type.Int.T) return null;
-                if (Base(TypeOf(e2)) != Type.Int.T) return null;
-                BadOperands(e, Type.Int.T, Type.Int.T);
-                return new Expr.Int(
-                        e.token,
-                        ((Expr.Int)e1).value.add(((Expr.Int)e2).value)
-                );
+                if (e1 == null || e2 == null) return null;
+                if (!(e1 instanceof Expr.Int)) return null;
+                if (!(e2 instanceof Expr.Int)) return null;
+                final BigInteger result = ((Expr.Int)e1).value.add(((Expr.Int)e2).value);
+                return new Expr.Int(e.token, result);
             }
             public Expr visit(Expr.Address e) { return e; }
 
@@ -2172,8 +2346,35 @@ public class Semant {
                 return e1;
             }
             public Expr visit(Expr.Compare e) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                final Expr e1 = ConstValue(e.left);
+                final Expr e2 = ConstValue(e.right);
+                if (e1 == null || e2 == null) return null;
+                if (!IsOrdinal(e1.type) || !IsOrdinal(e2.type)) return null;
+                if (!e1.type.equals(e2.type)) return null;
+                final boolean result;
+                if (Is(e1.type, Type.Int.class) != null) {
+                    final BigInteger i1 = ((Expr.Int) e1).value;
+                    final BigInteger i2 = ((Expr.Int) e2).value;
+                    final int comparison = i1.compareTo(i2);
+                    result = switch (e.op) {
+                        case GT -> comparison > 0;
+                        case GE -> comparison >= 0;
+                        case LT -> comparison < 0;
+                        case LE -> comparison <= 0;
+                    };
+                } else {
+                    final int b1 = ((Expr.Bool) e1).value ? 1 : 0;
+                    final int b2 = ((Expr.Bool) e2).value ? 1 : 0;
+                    result = switch (e.op) {
+                        case GT -> b1 > b2;
+                        case GE -> b1 >= b2;
+                        case LT -> b1 < b2;
+                        case LE -> b1 <= b2;
+                    };
+                }
+                e.type = Type.Bool.T;
+                return new Expr.Bool(e.token, result);
             }
             public Expr visit(Expr.Deref e) { return null; }
             public Expr visit(Expr.Div e) {
@@ -2189,8 +2390,13 @@ public class Semant {
                 return new Expr.Int(e.token, ((Expr.Int)e1).value.divide(((Expr.Int)e2).value));
             }
             public Expr visit(Expr.Equal e) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                final Expr e1 = ConstValue(e.left);
+                final Expr e2 = ConstValue(e.right);
+                if (e1 == null || e2 == null) return null;
+                final boolean isEqual = IsEqual(e1, e2, null);
+                e.type = Type.Bool.T;
+                return new Expr.Bool(e.token, isEqual);
             }
             public Expr visit(Expr.Neg e) {
                 Expr e1 = ConstValue(e.expr);
@@ -2213,8 +2419,14 @@ public class Semant {
                 return new Expr.Int(e.token, ((Expr.Int)e1).value.remainder(((Expr.Int)e2).value));
             }
             public Expr visit(Expr.Mul e) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                Expr e1 = ConstValue(e.left);
+                Expr e2 = ConstValue(e.right);
+                if (e1 == null || e2 == null) return null;
+                if (!(e1 instanceof Expr.Int)) return null;
+                if (!(e2 instanceof Expr.Int)) return null;
+                BigInteger result = ((Expr.Int)e1).value.multiply(((Expr.Int)e2).value);
+                return new Expr.Int(e.token, result);
             }
             public Expr visit(Expr.Named e) {
                 Value v = Resolve(e);
