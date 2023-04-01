@@ -7,7 +7,7 @@ _BUILTIN.Null=^null
 _BUILTIN.nil:Null=0
 _BUILTIN.Refany=^null
 _BUILTIN.Address=^null
-_BUILTIN.Root=
+_BUILTIN.Root=null
 object {
 }
 _BUILTIN.Text=^null
@@ -16,10 +16,10 @@ _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
 BEGIN FieldMethodSameName
-FieldMethodSameName.T=
+FieldMethodSameName.T=Root
 object {
-f:int
-f:()=null
+0: f:int
+0: f:()=null
 }
 END FieldMethodSameName
 END _BUILTIN

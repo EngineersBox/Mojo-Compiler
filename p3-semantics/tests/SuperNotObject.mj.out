@@ -7,7 +7,7 @@ _BUILTIN.Null=^null
 _BUILTIN.nil:Null=0
 _BUILTIN.Refany=^null
 _BUILTIN.Address=^null
-_BUILTIN.Root=
+_BUILTIN.Root=null
 object {
 }
 _BUILTIN.Text=^null
@@ -16,7 +16,7 @@ _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
 BEGIN SuperNotObject
-SuperNotObject.T=
+SuperNotObject.T=null
 object {
 }
 END SuperNotObject

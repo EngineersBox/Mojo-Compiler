@@ -39,22 +39,12 @@ public class Semant {
             MIN_VALUE = null;
             MAX_VALUE = null;
         }
-        Type.Int.init();
-        Type.Bool.init();
-        Type.Null.init();
-        Type.Refany.init();
-        Type.Addr.init();
-        Type.Root.init();
-        Type.Text.init();
-        Type.Proc.First.init();
-        Type.Proc.Last.init();
-        Type.Proc.New.init();
-        Type.Proc.Number.init();
     }
 
     public static void main(String[] args) {
         if (args.length != 1) usage();
         java.io.File file = new java.io.File(args[0]);
+        Type.init();
         try {
             Value.Unit unit = new Parser(file).Unit();
             if (Error.nErrors() > 0) return;
@@ -298,7 +288,7 @@ public class Semant {
                 // If type null:
                 // - if expr not null set type to type of expr
                 // - else if formal not null set type to type of formal
-                // - if type us null: "variable has no type"
+                // - if type is null: "variable has no type"
                 if (v.type != null) {
                     return v.type;
                 }
@@ -637,10 +627,13 @@ public class Semant {
                 // - "illegal recursive super type"
                 // - "super type must be an object type"
                 Check(t.parent);
-                if (t.parent.equals(t)) {
-                    Error.ID(t.token, "illegal recursive super type");
-                } else if (!(t.parent instanceof Type.Object)) {
-                    Error.ID(t.token, "super type must be an object type");
+                Type.Object parentType = null;
+                if (t.parent != null) {
+                    if (IsEqual(t, t.parent, null)) {
+                        Error.ID(t.token, "illegal recursive super type");
+                    } else if ((parentType = Is(t.parent, Type.Object.class)) == null) {
+                        Error.ID(t.token, "super type must be an object type");
+                    }
                 }
 
                 // TODO: check scopes have non-overlapping symbols [DONE]
@@ -660,34 +653,44 @@ public class Semant {
                     // TODO: bind method overrides to their original declarations [DONE]
                     // For each method in this object type's scope:
                     // - if method is not an override:
-                    //   - set index to position in this scope
+                    //   - set and increment method offset
                     // - if method is an override:
                     //   - lookup method declaration in parent
-                    //   - if found then set override method sig and index to
-                    //     those of parent method
+                    //   - if found then set overriding method's sig and offset
+                    //     to those of overridden method
                     //   - if not found "no method to override in supertype"
                     final List<Value.Method> methods = Stream.concat(
                             t.methods.stream(),
                             t.overrides.stream()
                     ).toList();
-                    int index = 0;
+                    int offset = 0;
                     for (final Value.Method method : methods) {
                         if (!method.override) {
-                            method.index = index++;
+                            method.offset = offset;
+                            offset += 4;
                             continue;
                         }
-                        final Value parentMethodValue = Scope.LookUp(
-                                t.parent.tipe.scope,
-                                method.name,
-                                true
-                        );
-                        if (parentMethodValue instanceof Value.Method parentMethod) {
-                            method.sig = parentMethod.sig;
-                            method.index = parentMethod.index;
-                        } else {
+                        Type.Object current = parentType;
+                        boolean found = false;
+                        while (current != null) {
+                            final Value parentMethodValue = Scope.LookUp(
+                                    current.methodScope,
+                                    method.name,
+                                    true
+                            );
+                            Value.Method parentMethod = Is(parentMethodValue, Value.Method.class);
+                            if (parentMethod != null) {
+                                method.sig = parentMethod.sig;
+                                method.offset = parentMethod.offset;
+                                found = true;
+                                break;
+                            }
+                            current = Is(current.parent, Type.Object.class);
+                        }
+                        if (!found) {
                             Error.ID(method.token, "no method to override in supertype");
                         }
-                        index++;
+                        offset += 4;
                     }
 
                     // check my fields and methods
@@ -695,7 +698,7 @@ public class Semant {
                     Check(t.methodScope);
                 }
                 recursionDepth--;
-                GetSizes(t);
+                GetOffsets(t);
                 return null;
             }
             public Void visit(Type.Array t) {
@@ -784,12 +787,13 @@ public class Semant {
                 t.fieldScope = Scope.PushNewClosed();
                 Scope.Insert(t.fields);
                 Scope.PopNew();
-                BigInteger size = BigInteger.valueOf(t.size);
+                BigInteger size = BigInteger.ZERO;
                 int offset = 0;
                 for (final Value.Field field : t.fields) {
                     Check(field);
                     field.type = Check(field.type);
-                    field.offset = offset++;
+                    field.offset = offset;
+                    offset += field.type.size;
                     size = size.add(BigInteger.valueOf(field.type.size));
                 }
                 if (size.bitLength() > Integer.SIZE) {
@@ -803,6 +807,7 @@ public class Semant {
                 // TODO: Check and set target (recursively) [DONE]
                 recursionDepth++;
                 {
+                    t.checked(true);
                     t.target = Check(t.target);
                 }
                 recursionDepth--;
@@ -824,9 +829,9 @@ public class Semant {
         if (t instanceof Type.Named) t = Strip(t);
         return t;
     }
-    // incremented/decremented every time the type checker enters/leaves
-    // one of the types that's allowed to introduce recursions
     int recursionDepth = 0;
+    // incremented/decremented every time the type checker enters/leaves one of
+    // the types that's allowed to introduce recursions
 
     /**
      * Return the constructed type of 't' (i.e., strip renaming).
@@ -1118,9 +1123,55 @@ public class Semant {
                 this.b = b;
             }
             public Boolean visit(Type.Object a) {
-                // Return true if a <: b
-                return IsEqual(b, Type.Root.T, null);
+                // TODO: Return true if a <: b
+                final Type.Object bObj = Is(this.b, Type.Object.class);
+                if (bObj == null) {
+                    return false;
+                } else if (IsEqual(bObj, Type.Root.T, null)
+                    || IsEqual(a, Type.Null.T, null)) {
+                    return true;
+                }
+                // Structural subtyping (check fields & methods)
+                final Map<String, Value.Field> aFields = new HashMap<>();
+                final Map<String, Value.Method> aMethods = new HashMap<>();
+                fullTypeSet(a, aFields, aMethods);
+                final Map<String, Value.Field> bFields = new HashMap<>();
+                final Map<String, Value.Method> bMethods = new HashMap<>();
+                fullTypeSet(bObj, bFields, bMethods);
+                final boolean hasFieldInterface = bFields.entrySet()
+                        .stream()
+                        .noneMatch((final Map.Entry<String, Value.Field> entry) -> {
+                                final Value.Field aField = aFields.get(entry.getKey());
+                                return aField == null || !IsSubtype(aField.type, entry.getValue().type);
+                        });
+                return hasFieldInterface && bMethods.entrySet()
+                        .stream()
+                        .noneMatch((final Map.Entry<String, Value.Method> entry) -> {
+                            final Value.Method aMethod = aMethods.get(entry.getKey());
+                            return aMethod == null || !IsSubtype(aMethod.sig, entry.getValue().sig);
+                        });
             }
+
+            private void fullTypeSet(final Type.Object obj,
+                                     final Map<String, Value.Field> fields,
+                                     final Map<String, Value.Method> methods) {
+                Type.Object current = obj;
+                while (current != null) {
+                    if (current.fields != null) {
+                        current.fields.stream()
+                                .filter((final Value.Field field) -> !fields.containsKey(field.name))
+                                .forEach((final Value.Field field) -> fields.put(field.name, field));
+                    }
+                    Stream.concat(
+                            current.methods == null ? Stream.empty() : current.methods.stream(),
+                            current.overrides == null ? Stream.empty() : current.overrides.stream()
+                    ).filter((final Value.Method method) -> !methods.containsKey(method.name))
+                            .forEach((final Value.Method method) -> methods.put(method.name, method));
+                    current = Is(current.parent, Type.Object.class);
+                }
+
+            }
+
             public Boolean visit(Type.Array a) {
                 Type ta = a, tb = b;
 
@@ -1131,6 +1182,10 @@ public class Semant {
                 // fixed and B is open (for the next n dimensions),
                 // or they are both fixed and have the same size (for
                 // the last p dimensions).
+                final Type.Array bArray = Is(b, Type.Array.class);
+                if (bArray == null) {
+                    return false;
+                }
 
                 return IsEqual(ta, tb, null);
             }
@@ -1143,13 +1198,16 @@ public class Semant {
                 return FormalsMatch(a.scope, b.scope, false, true, null);
             }
             public Boolean visit(Type.Ref a) {
-                // TODO:
+                // TODO: [DONE]
                 // Null <: ^T <: Refany
                 // That is, Refany contains all references,
                 // respectively, and nil is a member of every
                 // reference type.
-
-                return IsEqual(a, b, null);
+                final Type.Ref bRef = Is(this.b, Type.Ref.class);
+                return bRef != null
+                    && (IsEqual(a, Type.Null.T, null)
+                    || IsEqual(bRef, Type.Refany.T, null)
+                    || IsEqual(a.target, bRef.target, null));
             }
             public Boolean visit(Type.Err a) { return false; }
             public Boolean visit(Type.Int a) { return false; }
@@ -1273,41 +1331,52 @@ public class Semant {
         return Scope.LookUp(p.fieldScope, name, true);
     }
 
-    Value LookUp(Type.Object p, String name) {
+    /*
+     * Look up field or method with name in object type p.
+     * Return field/method and set visible[0] to the type in which found.
+     */
+    Value LookUp(Type.Object p, String name, Type visible[]) {
         Type t = p;
         for (;;) {
             t = Check(t);
-            if (t == Type.Err.T) return null;
-            if (t instanceof Type.Object) {
-                // found an object => try it!
-                p = (Type.Object)t;
+            if (t == Type.Err.T) {
+                if (visible != null) visible[0] = Type.Err.T;
+                return null;
+            }
+            if ((p = Is(t, Type.Object.class)) != null) {
+                // found an object type => try it!
                 Value v = Scope.LookUp(p.methodScope, name, true);
                 if (v != null) {
                     // find the first non-override declaration for this method
-                    v = PrimaryMethodDeclaration(p, v);
-                    if (v == null) return null;
+                    p = PrimaryMethodDeclaration(p, v);
+                    if (p == null) return null;
                 } else {
                     // try for a field
                     v = Scope.LookUp(p.fieldScope, name, true);
                 }
-                if (v != null) return v;
+                if (v != null) {
+                    if (visible != null) visible[0] = p;
+                    return v;
+                }
                 t = p.parent;
             } else return null;
         }
     }
 
-    Value PrimaryMethodDeclaration(Type.Object p, Value v) {
+    Type.Object PrimaryMethodDeclaration(Type.Object p, Value v) {
         if (p == null) return null;
         Value.Method method = Is(v, Value.Method.class);
-        if (!method.override) return method;
+        if (!method.override) return p;
         if (inPrimLookUp.contains(p)) {
             Error.Msg(p.token, "illegal recursive supertype");
             return null;
         }
         inPrimLookUp.add(p);
-        v = LookUp(Is(p.parent, Type.Object.class), method.name);
+        Type.Object[] visible = {null};
+        v = LookUp(Is(p.parent, Type.Object.class), method.name, visible);
         inPrimLookUp.remove(p);
-        return v;
+        if (v != null) return visible[0];
+        return null;
     }
     final HashSet<Type.Object> inPrimLookUp = new HashSet<Type.Object>();
 
@@ -1327,6 +1396,20 @@ public class Semant {
                 Error.Msg(t.token, "object type is too large");
                 t.fieldSize = 0;
             } else t.fieldSize = size.intValue();
+        }
+    }
+
+    void GetOffsets(Type.Object t) {
+        if (t.fieldOffset >= 0) return;
+        GetSizes(t);
+        if (t.parent == null) {
+            t.fieldOffset = 0;
+            t.methodOffset = 0;
+        } else {
+            Type.Object parent = Is(t.parent, Type.Object.class);
+            GetOffsets(parent);
+            t.fieldOffset = parent.fieldOffset + parent.fieldSize;
+            t.methodOffset = parent.methodOffset + parent.methodSize;
         }
     }
 
@@ -1630,28 +1713,28 @@ public class Semant {
                 assert e.type != null;
                 return e.type;
             }
-            public Type visit(Expr.Call e) {
-                Resolve(e);
-                if (e.procType == null)
+            public Type visit(Expr.Call ce) {
+                Resolve(ce);
+                if (ce.procType == null)
                     return Type.Err.T;
-                else if (e.procType.fixedType != null)
-                    return e.procType.fixedType;
+                else if (ce.procType.fixedType != null)
+                    return ce.procType.fixedType;
                 else {
-                    FixArgs(e);
-                    return e.procType.accept(new Type.Proc.Visitor<Type>() {
+                    FixArgs(ce);
+                    return ce.procType.accept(new Type.Proc.Visitor<Type>() {
                         public Type visit(Type.Proc.User p) {
-                            Type t = TypeOf(e.proc);
+                            Type t = TypeOf(ce.proc);
                             if (t == Type.Err.T) return t;
-                            if (t == null) t = MethodType(Is(e.proc, Expr.Qualify.class));
+                            if (t == null) t = MethodType(Is(ce.proc, Expr.Qualify.class));
                             return Result(Is(t, Type.Proc.class));
                         }
                         public Type visit(Type.Proc.First p) {
                             Type index;
-                            Type t = TypeOf(e.args[0]);
+                            Type t = TypeOf(ce.args[0]);
                             Type.Array a = Is(t, Type.Array.class);
                             if (a != null) {
                                 index = ConstValue(a.number) == null ? Type.Int.T : TypeOf(a.number);
-                            } else if ((t = IsType(e.args[0])) != null) {
+                            } else if ((t = IsType(ce.args[0])) != null) {
                                 a = Is(t, Type.Array.class);
                                 if (a != null) {
                                     index = ConstValue(a.number) == null ? Type.Int.T : TypeOf(a.number);
@@ -1668,7 +1751,7 @@ public class Semant {
                         }
                         public Type visit(Type.Proc.New p) {
                             Type t;
-                            if ((t = IsType(e.args[0])) == null) {
+                            if ((t = IsType(ce.args[0])) == null) {
                                 t = Type.Null.T;
                             } else if (Is(t, Type.Ref.class) != null) {
                                 // ok
@@ -2783,8 +2866,10 @@ public class Semant {
             e.expr = new Expr.Deref(e.token, e.expr);
             t = TypeOf(e.expr);
         }
-
-        Value v;
+        e.holder = t;
+        assert e.value == null;
+        Type base = Base(t);
+        final Value v;
         if (t == Type.Err.T)
             // the lhs already contains an error => silently make it look like
             // everything is ok
@@ -2792,22 +2877,24 @@ public class Semant {
         else if (t == null) {
             // a module or type
             if ((t = IsType(e.expr)) != null) {
-                v = LookUp(Is(t, Type.Object.class), e.name.image);
-                if (v != null) e.objType = t;
-            } else if (e.expr instanceof Expr.Named) {
-                v = Resolve((Expr.Named)e.expr);
-                if (v instanceof Value.Unit) {
-                    Value.Unit m = (Value.Unit)v;
-                    v = Scope.LookUp(m.localScope, v.name, true);
+                Type.Object[] visible = {null};
+                v = LookUp(Is(t, Type.Object.class), e.name.image, visible);
+                if (v != null) {                    
+                    e.objType = t;
+                    e.holder = visible[0];
                 }
+            } else if (e.expr instanceof Expr.Named n) {
+                if (Resolve(n) instanceof Value.Unit m)
+                    v = Scope.LookUp(m.localScope, m.name, true);
+                else v = null;
             } else v = null;
-        } else {
-            Type base = Base(t);
-            v = LookUp(Is(base, Type.Record.class), e.name.image);
-            if (v != null) return e.value = v;
-            v = LookUp(Is(base, Type.Object.class), e.name.image);
-            if (v != null) return e.value = v;
-        }    
+        } else if (base instanceof Type.Record p) {
+            v = LookUp(p, e.name.image);
+        } else if (base instanceof Type.Object p) {
+            Type.Object[] visible = {null};
+            v = LookUp(p, e.name.image, visible);
+            if (v != null) e.holder = visible[0];
+        } else v = null;  
         return e.value = v;
     }
 
@@ -2866,7 +2953,7 @@ public class Semant {
         case Type: {
             Value v;
             Type t = Strip(lhs.type);
-            if ((v = Is(LookUp(Is(t, Type.Object.class), name), Value.Method.class)) != null) {
+            if ((v = Is(LookUp(Is(t, Type.Object.class), name, null), Value.Method.class)) != null) {
                 lhs.kind = LHS.Kind.Expr;
                 lhs.expr = new Expr.Method(t, name, v);
             } else // type that can't be qualified
@@ -2915,20 +3002,8 @@ public class Semant {
     }
 
     void FixArgs(Expr.Call e) {
-        int minArgs = e.procType.accept(new Type.Proc.Visitor<Integer>() {
-            public Integer visit(Type.Proc.User p) { return 0; }
-            public Integer visit(Type.Proc.First p) { return 1; }
-            public Integer visit(Type.Proc.Last p) { return 1; }
-            public Integer visit(Type.Proc.Number p) { return 1; }
-            public Integer visit(Type.Proc.New p) { return 1; }
-        });
-        int maxArgs = e.procType.accept(new Type.Proc.Visitor<Integer>() {
-            public Integer visit(Type.Proc.User p) { return Integer.MAX_VALUE; }
-            public Integer visit(Type.Proc.First p) { return 1; }
-            public Integer visit(Type.Proc.Last p) { return 1; }
-            public Integer visit(Type.Proc.Number p) { return 1; }
-            public Integer visit(Type.Proc.New p) { return Integer.MAX_VALUE; }
-        });
+        int minArgs = e.procType.minArgs;
+        int maxArgs = e.procType.maxArgs;
         if (e.args.length < minArgs) {
             Error.Msg(e.token, "too few arguments");
             Expr[] z = new Expr[minArgs];
@@ -3006,11 +3081,17 @@ public class Semant {
             public String visit(Type.Int t) { return t.token.image; }
             public String visit(Type.Named t) { return t.name; }
             public String visit(Type.Object t) {
-                String s = String.format("%nobject {%n");
-                for (Value v : Scope.ToList(t.fieldScope))
-                    s += String.format(ToString(v) + "%n");
-                for (Value v : Scope.ToList(t.methodScope))
-                    s += String.format(ToString(v) + "%n");
+                String s = "";
+                s += ToString(t.parent, true);
+                s += String.format("%nobject {%n");
+                for (Value.Field f : t.fields) {
+                    Type.Object p = Is(f.parent, Type.Object.class);
+                    s += (p.fieldOffset + f.offset) + ": " + String.format(ToString(f) + "%n");
+                }
+                for (Value.Method m : t.overrides)
+                    s += (m.parent.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");
+                for (Value.Method m : t.methods)
+                    s += (m.parent.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");
                 s += "}";
                 return s;
             }
@@ -3035,8 +3116,8 @@ public class Semant {
             }
             public String visit(Type.Record p) {
                 String s = String.format("%nstruct {%n");
-                for (Value v : Scope.ToList(p.fieldScope))
-                    s += String.format(ToString(v) + "%n");
+                for (Value.Field f : p.fields)
+                    s += f.offset + ": " + String.format(ToString(f) + "%n");
                 s += "}";
                 return s;
             }

@@ -7,7 +7,7 @@ _BUILTIN.Null=^null
 _BUILTIN.nil:Null=0
 _BUILTIN.Refany=^null
 _BUILTIN.Address=^null
-_BUILTIN.Root=
+_BUILTIN.Root=null
 object {
 }
 _BUILTIN.Text=^null
@@ -17,9 +17,9 @@ _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
 BEGIN DefaultNestedProcedure
 BEGIN DefaultNestedProcedure.1
-DefaultNestedProcedure.1.T=
+DefaultNestedProcedure.1.T=Root
 object {
-bar:()=DefaultNestedProcedure.1.Bar:(VALUE t:T)
+0: bar:()=DefaultNestedProcedure.1.Bar:(VALUE t:T)
 }
 DefaultNestedProcedure.1.Bar:(VALUE t:T)
 BEGIN DefaultNestedProcedure.1.Bar

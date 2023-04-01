@@ -466,7 +466,6 @@ public abstract class Absyn {
                 Object t = new Object(ID("Root"), null, null, null, null);
                 t.fieldScope = s;
                 t.methodScope = s;
-                t.checked(true);
                 T = t;
             }
             static void init() {
@@ -482,6 +481,20 @@ public abstract class Absyn {
             static void init() {
                 Scope.Insert(new Value.Tipe(ID("Text"), T));
             }
+        }
+
+        static void init() {
+            Int.init();
+            Bool.init();
+            Null.init();
+            Refany.init();
+            Addr.init();
+            Root.init();
+            Text.init();
+            Proc.First.init();
+            Proc.Last.init();
+            Proc.New.init();
+            Proc.Number.init();
         }
     }
 
@@ -595,7 +608,7 @@ public abstract class Absyn {
          */
         public static class Method extends Value {
             public final boolean override;
-            public final Type.Object parent;
+            public Type.Object parent;
             public Type.Proc sig;
             public final Expr expr;
             public Method(Token id, Type.Object parent, Type.Proc sig, Expr expr) {
@@ -607,7 +620,7 @@ public abstract class Absyn {
                 readonly(true);
             }
             public <R> R accept(Visitor<R> v) { return v.visit(this); }
-            public int index;
+            public int offset = -1;
             public Value value;
         }
 
@@ -646,14 +659,12 @@ public abstract class Absyn {
         public static class Procedure extends Value {
             public final Type.Proc sig;
             public final Stmt block;
-            public final boolean builtin;
             public Procedure(Token id, Type.Proc sig, Stmt block) {
                 super(id);
                 this.sig = sig;
                 this.block = block;
                 readonly(true);
-                builtin = sig == null;
-                if (block == null) {
+                if (sig instanceof Type.Proc.User && block == null) {
                     external(true);
                     this.extName = id.image;
                 }
@@ -930,6 +941,7 @@ public abstract class Absyn {
             }
             public <R> R accept(Visitor<R> v) { return v.visit(this); }
             public Value value;
+            public Type holder;
             public Type objType;
         }
         /**

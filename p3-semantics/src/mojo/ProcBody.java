@@ -64,7 +64,8 @@ public abstract class ProcBody {
     /**
      * Generate all the procedure bodies.
      */
-    public static <T> void EmitAll(Value.Visitor<Void> decl, Value.Visitor<Void> body) {
+    public static <T> void EmitAll(Value.Visitor<Void> decl,
+                                   Value.Visitor<Void> body) {
         // generate the declarations and bodies
         while (head != null) {
             ProcBody t = head; head = null; // grab the guys that are waiting
