@@ -1123,7 +1123,7 @@ public class Semant {
                 this.b = b;
             }
             public Boolean visit(Type.Object a) {
-                // TODO: Return true if a <: b
+                // TODO: Return true if a <: b [DONE]
                 final Type.Object bObj = Is(this.b, Type.Object.class);
                 if (bObj == null) {
                     return false;
@@ -1175,19 +1175,38 @@ public class Semant {
             public Boolean visit(Type.Array a) {
                 Type ta = a, tb = b;
 
-                // TODO: An array type A is a subtype of an array type
-                // B if they have the same ultimate element type, the
-                // same number of dimensions, and, for each dimension,
-                // either both are open (for the first m), or A is
-                // fixed and B is open (for the next n dimensions),
-                // or they are both fixed and have the same size (for
-                // the last p dimensions).
-                final Type.Array bArray = Is(b, Type.Array.class);
-                if (bArray == null) {
+                // TODO: [DONE]
+                //  An array type A is a subtype of an array type
+                //  B if they have the same ultimate element type, the
+                //  same number of dimensions, and, for each dimension,
+                //  either both are open (for the first m), or A is
+                //  fixed and B is open (for the next n dimensions),
+                //  or they are both fixed and have the same size (for
+                //  the last p dimensions).
+                Type.Array bArray = Is(b, Type.Array.class);
+                if (bArray == null || a == null) {
                     return false;
                 }
 
-                return IsEqual(ta, tb, null);
+                Type.Array aArray = a;
+                while (true) {
+                    final boolean aClosed = aArray.size != -1;
+                    final boolean bClosed = bArray.size != -1;
+                    if (!(aArray.size == bArray.size
+                        || (aArray.size <= bArray.size && aClosed && bClosed))) {
+                        return false;
+                    }
+                    final Type.Array nextA = Is(aArray.element, Type.Array.class);
+                    final Type.Array nextB = Is(bArray.element, Type.Array.class);
+                    if (nextA == null ^ nextB == null) {
+                        return false;
+                    } else if (nextA == null) {
+                        break;
+                    }
+                    aArray = nextA;
+                    bArray = nextB;
+                }
+                return IsEqual(aArray.element, bArray.element, null);
             }
             public Boolean visit(Type.Proc a) {
                 Type.Proc b = Is(this.b, Type.Proc.class);
@@ -1548,8 +1567,8 @@ public class Semant {
                 if (Base(TypeOf(s.expr)) != Type.Bool.T) {
                     Error.ID(s.token, "if condition must be a boolean");
                 }
-                if (Check(s.block, returnOK, returnType, s) != null
-                    || Check(s.stmt, returnOK, returnType, s) != null) {
+                if ((s.block != null && Check(s.block, returnOK, returnType, s) != null)
+                    || (s.stmt != null && Check(s.stmt, returnOK, returnType, s) != null)) {
                     return Type.Err.T;
                 }
                 return null;
@@ -1609,19 +1628,19 @@ public class Semant {
                     Scope.Insert(s.decls);
                     Check(s.scope);
                 }
-                final AtomicReference<Type> returnType = new AtomicReference<>();
+                final AtomicReference<Type> refReturnType = new AtomicReference<>();
                 s.body.forEach((final Stmt stmt) -> {
-                    returnType.set(Check(
+                    refReturnType.set(Check(
                             stmt,
                             returnOK,
-                            returnType.get(),
+                            returnType,
                             null
                     ));
                 });
                 if (!s.decls.isEmpty()) {
                     Scope.PopNew();
                 }
-                return returnType.get();
+                return refReturnType.get();
             }
         }
         return stmt.accept(new Visitor());
