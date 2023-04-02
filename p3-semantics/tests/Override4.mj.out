@@ -15,20 +15,21 @@ _BUILTIN.First:(...)
 _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
-BEGIN Override2
-Override2.A=Root
+BEGIN Override4
+Override4.FooA:(VALUE a:A; VALUE x:A)
+Override4.FooB:(VALUE b:B; VALUE x:A)
+Override4.FooC:(VALUE c:C; VALUE x:A)
+Override4.A=Root
 object {
-0: m:()=Override2.P:(VALUE a:A)
+0: foo:(VALUE x:A)=Override4.FooA:(VALUE a:A; VALUE x:A)
 }
-Override2.B=A
+Override4.B=A
 object {
-0: m:()=Override2.Q:(VALUE a:A)
+0: foo:(VALUE x:A)=Override4.FooB:(VALUE b:B; VALUE x:A)
 }
-Override2.C=A
+Override4.C=B
 object {
-4: m:()=Override2.Q:(VALUE a:A)
+0: foo:(VALUE x:A)=Override4.FooC:(VALUE c:C; VALUE x:A)
 }
-Override2.P:(VALUE a:A)
-Override2.Q:(VALUE a:A)
-END Override2
+END Override4
 END _BUILTIN

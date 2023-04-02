@@ -15,20 +15,14 @@ _BUILTIN.First:(...)
 _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
-BEGIN Override
-Override.FooU:(VALUE u:U)
-Override.FooT:(VALUE t:T)
-Override.U=Root
+BEGIN MethodRedefine
+MethodRedefine.A=Root
 object {
-0: x:int
-0: foo:()=Override.FooU:(VALUE u:U)
-4: bar:()=null
+0: foo:()=null
 }
-Override.T=U
+MethodRedefine.B=A
 object {
-4: y:int
-0: foo:()=Override.FooT:(VALUE t:T)
-8: baz:()=null
+4: foo:()=null
 }
-END Override
+END MethodRedefine
 END _BUILTIN

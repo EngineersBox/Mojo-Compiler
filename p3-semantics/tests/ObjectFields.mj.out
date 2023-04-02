@@ -15,20 +15,18 @@ _BUILTIN.First:(...)
 _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
-BEGIN Override
-Override.FooU:(VALUE u:U)
-Override.FooT:(VALUE t:T)
-Override.U=Root
+BEGIN ObjectFields
+ObjectFields.A=Root
 object {
 0: x:int
-0: foo:()=Override.FooU:(VALUE u:U)
-4: bar:()=null
 }
-Override.T=U
+ObjectFields.B=A
 object {
-4: y:int
-0: foo:()=Override.FooT:(VALUE t:T)
-8: baz:()=null
+4: x:int
 }
-END Override
+ObjectFields.C=B
+object {
+8: x:int
+}
+END ObjectFields
 END _BUILTIN

@@ -1440,19 +1440,14 @@ public class Semant {
      */
     Type MethodSigAsProcSig(Type.Proc method, Type objType) {
         if (method == null) return Type.Err.T;
-
         Type.Proc proc = new Type.Proc.User(method.token, null, method.result);
-        proc.scope = Scope.PushNewProc(null);
-
         // insert the "self" formal
-        Scope.Insert(new Value.Formal(ID("_self_"), Value.Formal.Mode.VALUE, objType));
+        proc.formals.add(new Value.Formal(ID("_self_"), Value.Formal.Mode.VALUE, objType));
         // copy the remaining formals
         for (Value formal: Formals(method)) {
-            Value.Formal f = Is(formal, Value.Formal.class);
-            Scope.Insert(new Value.Formal(f.token, f.mode, f.type));
+            Value.Formal f = (Value.Formal)formal;
+            proc.formals.add(new Value.Formal(f.token, f.mode, f.type));
         }
-
-        Scope.PopNew();
         return proc;
     }
 
@@ -1851,7 +1846,7 @@ public class Semant {
                 Value v = Resolve(e);
                 if (inTypeOf.contains(e)) {
                     IllegalRecursion(v);
-                    return Type.Err.T;
+                    return e.type = Type.Err.T;
                 }
                 inTypeOf.add(e);
                 Type t = TypeOf(v);
@@ -2861,9 +2856,9 @@ public class Semant {
 
     Type IsType(Expr e) {
         if (e == null) return null;
-        if (e instanceof Expr.TypeExpr) return ((Expr.TypeExpr)e).value;
-        if (e instanceof Expr.Named) return ToType(Resolve((Expr.Named)e));
-        if (e instanceof Expr.Qualify) return ToType(Resolve((Expr.Qualify)e));
+        if (e instanceof Expr.TypeExpr exp) return exp.value;
+        if (e instanceof Expr.Named exp) return ToType(Resolve(exp));
+        if (e instanceof Expr.Qualify exp) return ToType(Resolve(exp));
         return null;
     }
 
@@ -2902,10 +2897,9 @@ public class Semant {
                     e.objType = t;
                     e.holder = visible[0];
                 }
-            } else if (e.expr instanceof Expr.Named n) {
-                if (Resolve(n) instanceof Value.Unit m)
-                    v = Scope.LookUp(m.localScope, m.name, true);
-                else v = null;
+            } else if (Resolve(Is(e.expr, Expr.Named.class))
+                       instanceof Value.Unit m) {
+                v = Scope.LookUp(m.localScope, m.name, true);
             } else v = null;
         } else if (base instanceof Type.Record p) {
             v = LookUp(p, e.name.image);
@@ -2941,8 +2935,7 @@ public class Semant {
             Expr e;
             if (lhs.expr == null)
                 lhs.kind = LHS.Kind.None;
-            else if (lhs.expr instanceof Expr.Qualify) {
-                Expr.Qualify p = (Expr.Qualify)lhs.expr;
+            else if (lhs.expr instanceof Expr.Qualify p) {
                 lhs.kind = LHS.Kind.Expr;
                 lhs.expr = p.expr;
                 DoQualify(lhs, p.name.image);
@@ -2951,8 +2944,8 @@ public class Semant {
                 lhs.kind = LHS.Kind.Type;
                 lhs.type = t;
                 DoQualify(lhs, name);
-            } else if (lhs.expr instanceof Expr.Named
-                       && (v = Resolve((Expr.Named)lhs.expr)) != null) {
+            } else if (lhs.expr instanceof Expr.Named n
+                       && (v = Resolve(n)) != null) {
                 lhs.kind = LHS.Kind.Value;
                 lhs.value = v;
                 DoQualify(lhs, name);
@@ -2972,9 +2965,11 @@ public class Semant {
         case Type: {
             Value v;
             Type t = Strip(lhs.type);
-            if ((v = Is(LookUp(Is(t, Type.Object.class), name, null), Value.Method.class)) != null) {
+            Type.Object[] visible = {null};
+            if (LookUp(Is(t, Type.Object.class), name, visible)
+                instanceof Value.Method m) {
                 lhs.kind = LHS.Kind.Expr;
-                lhs.expr = new Expr.Method(t, name, v);
+                lhs.expr = new Expr.Method(t, name, m);
             } else // type that can't be qualified
                 lhs.kind = LHS.Kind.None;
             return;
@@ -3107,8 +3102,10 @@ public class Semant {
                     Type.Object p = Is(f.parent, Type.Object.class);
                     s += (p.fieldOffset + f.offset) + ": " + String.format(ToString(f) + "%n");
                 }
-                for (Value.Method m : t.overrides)
-                    s += (m.parent.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");
+                for (Value.Method m : t.overrides) {
+                    Type.Object p = PrimaryMethodDeclaration(m.parent, m);
+                    s += (p.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");
+                }
                 for (Value.Method m : t.methods)
                     s += (m.parent.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");
                 s += "}";
@@ -3165,7 +3162,9 @@ public class Semant {
             public String visit(Expr.Equal e)     { return null; }
             public String visit(Expr.Neg e)       { return null; }
             public String visit(Expr.Mod e)       { return null; }
-            public String visit(Expr.Method e)    { return ToString(e.method); }
+            public String visit(Expr.Method e)    {
+                return ToString(e.object, true) + "." + e.method.name;
+            }
             public String visit(Expr.Mul e)       { return null; }
             public String visit(Expr.Not e)       { return null; }
             public String visit(Expr.Int e)       { return e.value.toString(); }

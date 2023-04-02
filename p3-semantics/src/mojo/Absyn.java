@@ -1069,7 +1069,7 @@ public abstract class Absyn {
             public Type object;
             public final String name;
             public final Value method;
-            public Method(Type object, String name, Value method) {
+            public Method(Type object, String name, Value.Method method) {
                 super(null, 8);
                 this.object = object;
                 this.name = name;

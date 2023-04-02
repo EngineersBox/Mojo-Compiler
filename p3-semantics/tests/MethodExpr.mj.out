@@ -15,20 +15,11 @@ _BUILTIN.First:(...)
 _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
-BEGIN Override
-Override.FooU:(VALUE u:U)
-Override.FooT:(VALUE t:T)
-Override.U=Root
+BEGIN MethodExpr
+MethodExpr.T=Root
 object {
-0: x:int
-0: foo:()=Override.FooU:(VALUE u:U)
-4: bar:()=null
+0: foo:()=null
 }
-Override.T=U
-object {
-4: y:int
-0: foo:()=Override.FooT:(VALUE t:T)
-8: baz:()=null
-}
-END Override
+MethodExpr.foo:(VALUE _self_:T)=T.foo
+END MethodExpr
 END _BUILTIN

@@ -15,20 +15,15 @@ _BUILTIN.First:(...)
 _BUILTIN.Last:(...)
 _BUILTIN.New:(...)
 _BUILTIN.Number:(...)
-BEGIN Override
-Override.FooU:(VALUE u:U)
-Override.FooT:(VALUE t:T)
-Override.U=Root
-object {
+BEGIN RecordRecord2
+RecordRecord2.Rec=
+struct {
 0: x:int
-0: foo:()=Override.FooU:(VALUE u:U)
-4: bar:()=null
+4: pair:
+struct {
+0: y:int
+4: z:int
 }
-Override.T=U
-object {
-4: y:int
-0: foo:()=Override.FooT:(VALUE t:T)
-8: baz:()=null
 }
-END Override
+END RecordRecord2
 END _BUILTIN
