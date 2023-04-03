@@ -69,8 +69,12 @@ for t in $TESTS; do
 	if [ "$?" != "0" ]; then
 	    printf "\r${RED}fail ${NORM}\n"
 	    failed=$(($failed + 1))
-	    continue
+            continue
 	fi
+    elif [ -s "$err" ]; then
+	printf "\r${RED}fail ${NORM}\n"
+	failed=$(($failed + 1))
+        continue
     fi
     # compare with expected stdout
     diff -q $expout $out 2>/dev/null > $out.diff

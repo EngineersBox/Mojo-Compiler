@@ -727,7 +727,7 @@ public class Semant {
                 }
                 Check(t.number.type);
                 final Type.Int number = Is(t.number.type,Type.Int.class);
-                if (number == null || Is(t.number.type, Type.Err.class) == null) {
+                if (number == null && Is(t.number.type, Type.Err.class) == null) {
                     Error.ID(t.token, "array length must be an integer expression");
                 }
                 t.element = Check(t.element);
