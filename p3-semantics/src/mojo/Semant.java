@@ -125,6 +125,7 @@ public class Semant {
                 // the formals will be reused by procedures with the
                 // same signature.
 
+                if (p.block == null) return null;
                 p.body = new ProcBody() {
                         public void accept(Value.Visitor<Void> v) {
                             p.accept(v);
@@ -299,6 +300,7 @@ public class Semant {
                 }
                 if (v.type == null) {
                     Error.ID(v.token, "variable has no type");
+                    v.type = Type.Err.T;
                 }
                 return v.type;
             }
@@ -631,7 +633,7 @@ public class Semant {
                 if (t.parent != null) {
                     if (IsEqual(t, t.parent, null)) {
                         Error.ID(t.token, "illegal recursive super type");
-                    } else if ((parentType = Is(t.parent, Type.Object.class)) == null) {
+                    } else if ((t.parent = parentType = Is(t.parent, Type.Object.class)) == null) {
                         Error.ID(t.token, "super type must be an object type");
                     }
                 }
@@ -667,7 +669,7 @@ public class Semant {
                     for (final Value.Method method : methods) {
                         if (!method.override) {
                             method.offset = offset;
-                            offset += 4;
+                            offset += wordSize;
                             continue;
                         }
                         Type.Object current = parentType;
@@ -690,7 +692,7 @@ public class Semant {
                         if (!found) {
                             Error.ID(method.token, "no method to override in supertype");
                         }
-                        offset += 4;
+                        offset += wordSize;
                     }
 
                     // check my fields and methods
@@ -725,12 +727,12 @@ public class Semant {
                 }
                 Check(t.number.type);
                 final Type.Int number = Is(t.number.type,Type.Int.class);
-                if (number == null && Is(t.number.type, Type.Err.class) == null) {
+                if (number == null || Is(t.number.type, Type.Err.class) == null) {
                     Error.ID(t.token, "array length must be an integer expression");
                 }
                 t.element = Check(t.element);
                 final Expr constValue = ConstValue(t.number);
-                if (constValue == null) {
+                if (constValue == null || Is(constValue, Expr.Int.class) == null) {
                     return null;
                 }
                 if (IsOpenArray(t.element) != null) {
@@ -808,7 +810,12 @@ public class Semant {
                 recursionDepth++;
                 {
                     t.checked(true);
-                    t.target = Check(t.target);
+                    if (t.target == null
+                        && t.tipe.name.equals(Type.Null.T.tipe.name)) {
+                        t.target = null;
+                    } else {
+                        t.target = Check(t.target);
+                    }
                 }
                 recursionDepth--;
                 return null;
@@ -1354,14 +1361,11 @@ public class Semant {
      * Look up field or method with name in object type p.
      * Return field/method and set visible[0] to the type in which found.
      */
-    Value LookUp(Type.Object p, String name, Type visible[]) {
+    Value LookUp(Type.Object p, String name, Type.Object visible[]) {
         Type t = p;
         for (;;) {
             t = Check(t);
-            if (t == Type.Err.T) {
-                if (visible != null) visible[0] = Type.Err.T;
-                return null;
-            }
+            if (t == Type.Err.T) return null;
             if ((p = Is(t, Type.Object.class)) != null) {
                 // found an object type => try it!
                 Value v = Scope.LookUp(p.methodScope, name, true);
@@ -3104,7 +3108,9 @@ public class Semant {
                 }
                 for (Value.Method m : t.overrides) {
                     Type.Object p = PrimaryMethodDeclaration(m.parent, m);
-                    s += (p.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");
+                    int x = m.offset;
+                    if (p != null) x += p.methodOffset;
+                    s += x + ": " + String.format(ToString(m) + "%n");
                 }
                 for (Value.Method m : t.methods)
                     s += (m.parent.methodOffset + m.offset) + ": " + String.format(ToString(m) + "%n");

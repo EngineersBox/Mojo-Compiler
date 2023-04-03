@@ -71,16 +71,15 @@ for t in $TESTS; do
 	    failed=$(($failed + 1))
 	    continue
 	fi
-    else
-	# compare with expected stdout
-	diff -q $expout $out 2>/dev/null > $out.diff
+    fi
+    # compare with expected stdout
+    diff -q $expout $out 2>/dev/null > $out.diff
 
-        # report status
-        if [ "$?" != "0" ]; then
-	    printf "\r${RED}fail ${NORM}\n"
-	    failed=$(($failed + 1))
-            continue
-        fi
+    # report status
+    if [ "$?" != "0" ]; then
+        printf "\r${RED}fail ${NORM}\n"
+        failed=$(($failed + 1))
+        continue
     fi
 
     printf "\r${GREEN}ok   ${NORM}\n"
