@@ -1,0 +1,8 @@
+	.text
+OpenArrayFormal.foo:
+LABEL L.0
+
+
+	.text
+OpenArrayFormal:
+
