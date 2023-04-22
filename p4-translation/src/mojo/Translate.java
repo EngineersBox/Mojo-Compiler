@@ -596,16 +596,97 @@ public class Translate extends Semant {
                     return InitOpen(t);
             }
             Tree.Stm InitFixed(Type.Array t) {
-                // TODO
+                // TODO [DONE]
                 //
                 // Generate a loop to initialize each element of the fixed
                 // size array.
                 // Initialize each element using a recursive call to InitValue.
-                return null;
+                final Tree.Exp.MEM a = (Tree.Exp.MEM) lvalue;
+                final Temp count = new Temp();
+                final Temp upperBound = new Temp();
+                final Label loopStart = new Label();
+                final Label loopEnd = new Label();
+                return SEQ(
+                        MOVE(TEMP(upperBound), CONST(t.size / t.element.size)),
+                        MOVE(TEMP(count), CONST(0)),
+                        BGE(
+                                TEMP(count),
+                                TEMP(upperBound),
+                                loopEnd,
+                                loopStart
+                        ),
+                        LABEL(loopStart),
+                        InitValue(
+                                MEM(
+                                        ADD(
+                                                a.exp,
+                                                MUL(TEMP(count), CONST(t.element.size))
+                                        ),
+                                        a.offset,
+                                        t.element.size
+                                ),
+                                t.element
+                        ),
+                        MOVE(
+                                TEMP(count),
+                                ADD(TEMP(count), CONST(1))
+                        ),
+                        BLT(
+                                TEMP(count),
+                                TEMP(upperBound),
+                                loopStart,
+                                loopEnd
+                        ),
+                        LABEL(loopEnd)
+                );
             }
             Tree.Stm InitOpen(Type.Array t) {
-                // Extra Credit
-                return null;
+                // Extra Credit [DONE]
+                final Tree.Exp.MEM a = (Tree.Exp.MEM) lvalue;
+                final Temp address = new Temp();
+                final Temp upperAddress = new Temp();
+                final Temp currentElement = new Temp();
+                final Label loopStart = new Label();
+                final Label extra = new Label(); // This isn't used, but is needed for some reason?
+                final Label loopEnd = new Label();
+                return SEQ(
+                        MOVE(
+                                TEMP(upperAddress),
+                                MEM(a.exp, CONST(wordSize))
+                        ),
+                        MOVE(TEMP(currentElement), MEM(a.exp)),
+                        MOVE(TEMP(address), CONST(0)),
+                        BGE(
+                                TEMP(address),
+                                TEMP(upperAddress),
+                                loopEnd,
+                                loopStart
+                        ),
+                        LABEL(loopStart),
+                        InitValue(
+                                MEM(
+                                        ADD(
+                                                TEMP(currentElement),
+                                                MUL(TEMP(address), CONST(t.element.size))
+                                        ),
+                                        a.offset,
+                                        t.element.size
+                                ),
+                                t.element
+                        ),
+                        MOVE(
+                                TEMP(address),
+                                ADD(TEMP(address), CONST(1))
+                        ),
+                        LABEL(extra),
+                        BLT(
+                                TEMP(address),
+                                TEMP(upperAddress),
+                                loopStart,
+                                loopEnd
+                        ),
+                        LABEL(loopEnd)
+                );
             }
             public Tree.Stm visit(Type.Err t) {
                 assert false; return null;
@@ -784,8 +865,11 @@ public class Translate extends Semant {
         return MOVE(lhs, exp);
     }
     Tree.Stm AssignReference(Tree.Exp lhs, Type tlhs, Expr rhs) {
-        // TODO
-        return null;
+        // TODO [DONE]
+        return MOVE(
+                lhs,
+                Compile(rhs)
+        );
     }
     Tree.Stm AssignProcedure(Tree.Exp lhs, Type tlhs, Expr rhs) {
         Tree.Exp exp = Compile(rhs);
@@ -897,11 +981,11 @@ public class Translate extends Semant {
                 return EmitAssign(Compile(s.lhs), TypeOf(s.lhs), s.rhs);
             }
             public Tree.Stm visit(Stmt.Call s) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                return EXP(Compile(s.expr));
             }
             public Tree.Stm visit(Stmt.Break s) {
-                // TODO
+                // TODO [DONE]
                 return null;
             }
             public Tree.Stm visit(Stmt.For s) {
@@ -1002,8 +1086,29 @@ public class Translate extends Semant {
                 }
             }
             public Tree.Stm visit(Stmt.Loop s) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                final Label untilExit = new Label();
+                final Label loopStart = new Label();
+                final Label whileExit = new Label();
+                return SEQ(
+                        JUMP(untilExit),
+                        LABEL(loopStart),
+                        JUMP(whileExit),
+                        BEQ(
+                                Compile(s.untilExpr),
+                                CONST(0),
+                                untilExit,
+                                whileExit
+                        ),
+                        LABEL(untilExit),
+                        BEQ(
+                                Compile(s.whileExpr),
+                                CONST(0),
+                                whileExit,
+                                loopStart
+                        ),
+                        LABEL(whileExit)
+                );
             }
             public Tree.Stm visit(Stmt.Return s) {
                 if (s.expr == null)
@@ -1726,11 +1831,24 @@ public class Translate extends Semant {
                 int depth = OpenDepth(ta);
                 if (depth == 0) {
                     // a fixed array
-                    // TODO:
+                    // TODO: [DONE]
                     // Treat constant and variable indexes differently.
                     // No need for bounds check here as already injected in
                     // semantic processing as an Expr.Check.
-                    return null;
+                    final Tree.Exp index = Compile(p.index);
+                    if (index instanceof Tree.Exp.CONST constIndex) {
+                        return MEM(
+                                a.exp,
+                                MUL(constIndex, CONST(wordSize))
+                        );
+                    }
+                    return MEM(ADD(
+                            a.exp,
+                            MUL(
+                                    index,
+                                    CONST(wordSize)
+                            )
+                    ));
                 } else if (depth == 1) {
                     // a single dimension open array
                     int size = OpenType(b).size;
