@@ -48,10 +48,10 @@ def Print(self: Queens) {
       } else {
         putchar('.');
       }
-      putchar('\n');
     }
     putchar('\n');
   }
+  putchar('\n');
 }
 
 {

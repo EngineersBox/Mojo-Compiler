@@ -1174,11 +1174,6 @@ EXP(
   CONST 0,
   CONST 46)),
 LABEL L.95,
-EXP(
- CALL(
-  NAME putchar,
-  CONST 0,
-  CONST 10)),
 MOVE(
  TEMP t.84,
  ADD(
@@ -1206,6 +1201,11 @@ BLE(
  TEMP t.80,
  L.84, L.86),
 LABEL L.86,
+EXP(
+ CALL(
+  NAME putchar,
+  CONST 0,
+  CONST 10)),
 LABEL L.80
 
 

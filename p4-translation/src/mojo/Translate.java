@@ -16,7 +16,7 @@ import static mojo.Absyn.*;
 public class Translate extends Semant {
     private static void usage() {
         throw new java.lang.Error("Usage: java mojo.Translate "
-            + "[ -target= Mips|PPCDarwin|PPCLinux|x64 ] <source>.mj");
+            + "[ -target= Mips|PPCDarwin|PPCLinux|x64|interp ] <source>.mj");
     }
 
     final List<Frag> frags = new LinkedList<Frag>();
@@ -30,12 +30,16 @@ public class Translate extends Semant {
 
     public static void main(String[] args) {
         if (args.length < 1) usage();
-        boolean main = false;
+        boolean main = false, trace = false;
         Frame target = new x64.Frame("");
         if (args.length > 1)
             for (String arg : args) {
                 if (arg.equals("-main"))
                     main = true;
+                else if (arg.equals("-trace"))
+                    trace = true;
+                else if (arg.equals("-target=interp"))
+                    target = new interp.Frame();
                 else if (arg.startsWith("-"))
                     usage();
             }
@@ -48,10 +52,22 @@ public class Translate extends Semant {
             semant.Check(unit);
             if (Error.nErrors() > 0) return;
             semant.Compile(unit, main);
-            PrintWriter out = new PrintWriter(System.out);
-            for (Frag f : semant.frags) {
-                out.println(f);
-                out.flush();
+            if (Error.nErrors() > 0) return;
+            if (main && target instanceof interp.Frame t) {
+                interp.Interpreter i = new interp.Interpreter(t.dataLayout(), semant.frags, trace);
+                Frag.Proc proc = null;
+                for (Frag f: semant.frags)
+                    if (f instanceof Frag.Proc p
+                        && p.frame.name.toString().equals("main"))
+                        proc = p;
+                assert proc != null;
+                i.run(proc);
+            } else {
+                PrintWriter out = new PrintWriter(System.out);
+                for (Frag f : semant.frags) {
+                    out.println(f);
+                    out.flush();
+                }
             }
         } catch (java.io.FileNotFoundException e) {
             System.err.println("File not found:" + file.getName());
@@ -881,7 +897,7 @@ public class Translate extends Semant {
         return EXP(CALL(target.external("memcpy"),
                         ADD(lhs.exp, lhs.offset),
                         ADD(a.exp, a.offset),
-                        CONST(t.recSize)));
+                        CONST(t.size)));
     }
     Tree.Stm AssignArray(Tree.Exp.MEM lhs, Type tlhs, Expr e_rhs) {
         Tree.Stm stm = null;
@@ -986,7 +1002,7 @@ public class Translate extends Semant {
             }
             public Tree.Stm visit(Stmt.Break s) {
                 // TODO [DONE]
-                return null;
+                return JUMP(loopExit);
             }
             public Tree.Stm visit(Stmt.For s) {
                 Tree.Stm stm = null;
@@ -1081,8 +1097,18 @@ public class Translate extends Semant {
                             Compile(s.block, loopExit),
                             LABEL(f));
                 } else {
-                    // TODO
-                    return null;
+                    // TODO [DONE]
+                    final Label f = new Label();
+                    final Label after = new Label();
+                    return SEQ(
+                            CompileBranch(s.expr, t, f),
+                            LABEL(t),
+                            Compile(s.block, loopExit),
+                            JUMP(after),
+                            LABEL(f),
+                            Compile(s.stmt, loopExit),
+                            LABEL(after)
+                    );
                 }
             }
             public Tree.Stm visit(Stmt.Loop s) {
@@ -1090,19 +1116,21 @@ public class Translate extends Semant {
                 final Label untilExit = new Label();
                 final Label loopStart = new Label();
                 final Label whileExit = new Label();
+                final Tree.Exp untilExpr = Compile(s.untilExpr);
+                final Tree.Exp whileExpr = Compile(s.whileExpr);
                 return SEQ(
                         JUMP(untilExit),
                         LABEL(loopStart),
-                        JUMP(whileExit),
-                        BEQ(
-                                Compile(s.untilExpr),
+                        Compile(s.block, whileExit),
+                        untilExpr == null ? SEQ() : BEQ(
+                                untilExpr,
                                 CONST(0),
                                 untilExit,
                                 whileExit
                         ),
                         LABEL(untilExit),
-                        BEQ(
-                                Compile(s.whileExpr),
+                        whileExpr == null ? JUMP(loopStart) : BEQ(
+                                whileExpr,
                                 CONST(0),
                                 whileExit,
                                 loopStart
@@ -1745,8 +1773,25 @@ public class Translate extends Semant {
                 );
             }
             public Tree.Exp visit(Expr.Not e) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                final Label invertTrue = new Label();
+                final Label invertFalse = new Label();
+                final Temp temp = new Temp();
+                return ESEQ(
+                        SEQ(
+                                MOVE(TEMP(temp), CONST(0)),
+                                BEQ(
+                                        Compile(e.expr),
+                                        CONST(0),
+                                        invertTrue,
+                                        invertFalse
+                                ),
+                                LABEL(invertTrue),
+                                MOVE(TEMP(temp), CONST(1)),
+                                LABEL(invertFalse)
+                        ),
+                        TEMP(temp)
+                );
             }
             public Tree.Exp visit(Expr.Add e) { return ADD(Compile(e.left), Compile(e.right)); }
             public Tree.Exp visit(Expr.Sub e) { return SUB(Compile(e.left), Compile(e.right)); }
@@ -1755,8 +1800,8 @@ public class Translate extends Semant {
             public Tree.Exp visit(Expr.Mod e) { return MOD(Compile(e.left), Compile(e.right)); }
             public Tree.Exp visit(Expr.Pos e) { return Compile(e.expr); }
             public Tree.Exp visit(Expr.Neg e) {
-                // TODO
-                return null;
+                // TODO [DONE]
+                return SUB(CONST(0), Compile(e.expr));
             }
             public Tree.Exp visit(Expr.Deref e) {
                 Tree.Exp exp = Compile(e.expr);
@@ -1797,8 +1842,17 @@ public class Translate extends Semant {
                         prep = MOVE(TEMP(temp), exp);
                     }
                     passObject.put(e, temp);
-                    // TODO: make sure to include prep!
-                    return null;
+                    // TODO [DONE?]: make sure to include prep!
+                    return ESEQ(
+                            prep,
+                            MEM(
+                                    MEM(
+                                            TEMP(temp),
+                                            CONST(-wordSize) // TODO: Fix this
+                                    ),
+                                    CONST(m.parent.methodOffset + m.offset)
+                            )
+                    );
                 }
                 if (v instanceof Value.Field f) {
                     Tree.Exp exp = Compile(e.expr);

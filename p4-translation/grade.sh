@@ -77,7 +77,7 @@ for t in $TESTS; do
         continue
     fi
     # compare with expected stdout
-    diff -q $expout $out 2>/dev/null > $out.diff
+    diff --strip-trailing-cr -q $expout $out 2>/dev/null > $out.diff
 
     # report status
     if [ "$?" != "0" ]; then

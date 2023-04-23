@@ -240,7 +240,6 @@ public abstract class Absyn {
             }
             public <R> R accept(Visitor<R> v) { return v.visit(this); }
             public Scope fieldScope;
-            public int recSize = -1;
         }
 
         /**

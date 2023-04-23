@@ -36,10 +36,10 @@ def Print() {
       } else {
         putchar('.');
       }
-      putchar('\n');
     }
     putchar('\n');
   }
+  putchar('\n');
 }
 
 {
