@@ -33,6 +33,13 @@ public class Codegen implements Frame.CodeGen {
 
     public Temp visit(MOVE s) {
         // TODO
+        if (s.dst instanceof MEM dstmem) {
+
+        }
+        // MOVE(Exp, Exp)
+        Temp dst = s.dst.accept(this);
+        Temp src = s.src.accept(this);
+        insns.add(MOVE(dst, src));
         return null;
     }
 
@@ -51,18 +58,23 @@ public class Codegen implements Frame.CodeGen {
     }
 
     public Temp visit(LABEL l) {
-        // TODO
+        // TODO [DONE]
+        this.insns.add(new Instr.LABEL(l.label.toString() + ":", l.label));
         return null;
     }
 
     public Temp visit(CONST e) {
-        // TODO
-        return null;
+        // TODO [DONE]
+        final Temp d0 = new Temp();
+        this.insns.add(OPER("mov `d0, " + e.value, T(d0), T()));
+        return d0;
     }
 
     public Temp visit(NAME e) {
-        // TODO
-        return null;
+        // TODO [DONE]
+        final Temp d0 = new Temp();
+        this.insns.add(OPER("leaq " + e.label + "(%rip),`d0", T(d0), T()));
+		return d0;
     }
 
     public Temp visit(TEMP e) {
@@ -182,3 +194,4 @@ public class Codegen implements Frame.CodeGen {
         throw new Error();
     }
 }
+
