@@ -1,0 +1,17 @@
+def printf(format: Text; i: int);
+{
+    var a: int := 120;
+    var b: int := 240;
+    var c: int := a + b;
+    /*var d: int := a + 1;*/
+    /*var e: int := 1 + 2;*/
+    var f: int := 1 + b;
+    var g: int := f / a;
+    printf("A: %d\n", a);
+    printf("B: %d\n", b);
+    printf("C: %d\n", c);
+    /*printf("D: %d\n", d);*/
+    /*printf("E: %d\n", e);*/
+    printf("F: %d\n", f);
+    printf("G: %d\n", g);
+}

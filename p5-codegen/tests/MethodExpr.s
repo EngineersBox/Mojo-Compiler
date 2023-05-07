@@ -1,19 +1,21 @@
+	.data
+	.balign 8
+MethodExpr.T:
+	.quad badPtr
 	.text
-CallStmt:
+MethodExpr:
 	pushq %rbp
 	movq %rsp,%rbp
-L.2:
-	call _f
 #	returnSink
 	popq %rbp
 	ret
-	.globl _main
+	.globl main
 	.text
-_main:
+main:
 	pushq %rbp
 	movq %rsp,%rbp
-L.3:
-	call CallStmt
+L.2:
+	call MethodExpr
 #	returnSink
 	popq %rbp
 	ret
@@ -24,13 +26,13 @@ L.0:	.asciz	"Attempt to use a null pointer"
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
-L.4:
+L.3:
 	leaq L.0(%rip),%rax
 	movq %rax,%rdi
-	call _puts
-	mov %rax, 1
+	call puts
+	movabsq $1,%rax
 	movq %rax,%rdi
-	call _exit
+	call exit
 #	returnSink
 	popq %rbp
 	ret
@@ -41,13 +43,13 @@ L.1:	.asciz	"Subscript out of bounds"
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
-L.5:
+L.4:
 	leaq L.1(%rip),%rax
 	movq %rax,%rdi
-	call _puts
-	mov %rax, 1
+	call puts
+	movabsq $1,%rax
 	movq %rax,%rdi
-	call _exit
+	call exit
 #	returnSink
 	popq %rbp
 	ret

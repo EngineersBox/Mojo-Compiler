@@ -115,6 +115,7 @@ public class Frame extends Translate.Frame {
         return new InReg(t);
     }
 
+    static final Temp RIP = new Temp("%rip"); // instruction pointer
     static final Temp RAX = new Temp("%rax"); // return1
     static final Temp RBX = new Temp("%rbx"); // callee-saved
     static final Temp RCX = new Temp("%rcx"); // argument4
@@ -136,7 +137,7 @@ public class Frame extends Translate.Frame {
     // might show up in code
     static final Temp[]
             // registers dedicated to special purposes
-            specialRegs = { RSP, RBP },
+            specialRegs = { RSP, RBP, RIP },
             // registers to pass outgoing arguments
             argRegs = { RDI, RSI, RDX, RCX, R8, R9 },
             // registers that a callee must preserve for its caller
