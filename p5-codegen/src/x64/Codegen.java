@@ -34,28 +34,28 @@ public class Codegen implements Frame.CodeGen {
     public Temp visit(MOVE s) {
         // TODO [DONE]
         if (!(s.dst instanceof MEM memDst)) {
-            if (CONST32(s.src)) {
-                // MOVE(Exp, CONST32)
-                final CONST constSrc = (CONST) s.src;
+            if (!CONST32(s.src)) {
+                // MOVE(Exp, Exp)
                 final Temp dst = s.dst.accept(this);
-                if (constSrc.value.signum() == 0) {
-                    // MOVE(Exp, $0)
-                    this.insns.add(OPER(
-                            "xorq `s0,`d0",
-                            T(dst), T(dst)
-                    ));
-                } else {
-                    this.insns.add(OPER(
-                            "movq $" + constSrc.value + ",`d0",
-                            T(dst), T()
-                    ));
-                }
+                final Temp src = s.src.accept(this);
+                this.insns.add(MOVE(dst, src));
                 return dst;
             }
-            // MOVE(Exp, Exp)
+            // MOVE(Exp, CONST32)
+            final CONST constSrc = (CONST) s.src;
             final Temp dst = s.dst.accept(this);
-            final Temp src = s.src.accept(this);
-            this.insns.add(MOVE(dst, src));
+            if (constSrc.value.signum() == 0) {
+                // MOVE(Exp, $0)
+                this.insns.add(OPER(
+                        "xorq `s0,`d0",
+                        T(dst), T(dst)
+                ));
+            } else {
+                this.insns.add(OPER(
+                        "movq $" + constSrc.value + ",`d0",
+                        T(dst), T()
+                ));
+            }
             return dst;
         }
         assert memDst.size == Frame.wordSize;
