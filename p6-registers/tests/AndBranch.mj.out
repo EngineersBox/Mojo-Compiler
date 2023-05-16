@@ -183,8 +183,8 @@ AndBranch.And.y <= %rsi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-AndBranch.And.x->%rcx
-AndBranch.And.y->%rbx
+AndBranch.And.x->%rdi
+AndBranch.And.y->%rsi
 t.0->%rax
 t.1->%rax
 # Assembly code:
@@ -192,17 +192,15 @@ t.1->%rax
 AndBranch.And:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $16,%rsp
-	movq %rbx, -8(%rbp)
-	movq %rdi,%rcx
-	movq %rsi,%rbx
+#	movq %rdi,%rdi
+#	movq %rsi,%rsi
 L.6:
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rdi
 	je L.2
 L.3:
 	xorq %rax,%rax
-	cmpq %rax,%rbx
+	cmpq %rax,%rsi
 	je L.2
 L.1:
 	xorq %rax,%rax
@@ -211,8 +209,6 @@ L.2:
 	movq $1,%rax
 L.0:
 #	returnSink
-	movq -8(%rbp),%rbx
-	addq $16,%rsp
 	popq %rbp
 	ret
 END AndBranch.And
@@ -454,19 +450,19 @@ t.3: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.2->%rax
-t.3->%rax
+t.2->%rdi
+t.3->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.8:
-	leaq L.4(%rip),%rax
-	movq %rax,%rdi
+	leaq L.4(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -582,19 +578,19 @@ t.5: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.4->%rax
-t.5->%rax
+t.4->%rdi
+t.5->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.9:
-	leaq L.5(%rip),%rax
-	movq %rax,%rdi
+	leaq L.5(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

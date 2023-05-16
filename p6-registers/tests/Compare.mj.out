@@ -170,21 +170,19 @@ Compare.LT.y <= %rsi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-Compare.LT.x->%rcx
-Compare.LT.y->%rbx
+Compare.LT.x->%rdi
+Compare.LT.y->%rsi
 t.0->%rax
 # Assembly code:
 	.text
 Compare.LT:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $16,%rsp
-	movq %rbx, -8(%rbp)
-	movq %rdi,%rcx
-	movq %rsi,%rbx
+#	movq %rdi,%rdi
+#	movq %rsi,%rsi
 L.14:
 	xorq %rax,%rax
-	cmpq %rbx,%rcx
+	cmpq %rsi,%rdi
 	jl L.1
 L.2:
 #	movq %rax,%rax
@@ -194,8 +192,6 @@ L.1:
 	jmp L.2
 L.0:
 #	returnSink
-	movq -8(%rbp),%rbx
-	addq $16,%rsp
 	popq %rbp
 	ret
 END Compare.LT
@@ -371,21 +367,19 @@ Compare.LE.y <= %rsi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-Compare.LE.x->%rcx
-Compare.LE.y->%rbx
+Compare.LE.x->%rdi
+Compare.LE.y->%rsi
 t.1->%rax
 # Assembly code:
 	.text
 Compare.LE:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $16,%rsp
-	movq %rbx, -8(%rbp)
-	movq %rdi,%rcx
-	movq %rsi,%rbx
+#	movq %rdi,%rdi
+#	movq %rsi,%rsi
 L.15:
 	xorq %rax,%rax
-	cmpq %rbx,%rcx
+	cmpq %rsi,%rdi
 	jle L.4
 L.5:
 #	movq %rax,%rax
@@ -395,8 +389,6 @@ L.4:
 	jmp L.5
 L.3:
 #	returnSink
-	movq -8(%rbp),%rbx
-	addq $16,%rsp
 	popq %rbp
 	ret
 END Compare.LE
@@ -572,21 +564,19 @@ Compare.GT.y <= %rsi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-Compare.GT.x->%rcx
-Compare.GT.y->%rbx
+Compare.GT.x->%rdi
+Compare.GT.y->%rsi
 t.2->%rax
 # Assembly code:
 	.text
 Compare.GT:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $16,%rsp
-	movq %rbx, -8(%rbp)
-	movq %rdi,%rcx
-	movq %rsi,%rbx
+#	movq %rdi,%rdi
+#	movq %rsi,%rsi
 L.16:
 	xorq %rax,%rax
-	cmpq %rbx,%rcx
+	cmpq %rsi,%rdi
 	jg L.7
 L.8:
 #	movq %rax,%rax
@@ -596,8 +586,6 @@ L.7:
 	jmp L.8
 L.6:
 #	returnSink
-	movq -8(%rbp),%rbx
-	addq $16,%rsp
 	popq %rbp
 	ret
 END Compare.GT
@@ -773,21 +761,19 @@ Compare.GE.y <= %rsi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-Compare.GE.x->%rcx
-Compare.GE.y->%rbx
+Compare.GE.x->%rdi
+Compare.GE.y->%rsi
 t.3->%rax
 # Assembly code:
 	.text
 Compare.GE:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $16,%rsp
-	movq %rbx, -8(%rbp)
-	movq %rdi,%rcx
-	movq %rsi,%rbx
+#	movq %rdi,%rdi
+#	movq %rsi,%rsi
 L.17:
 	xorq %rax,%rax
-	cmpq %rbx,%rcx
+	cmpq %rsi,%rdi
 	jge L.10
 L.11:
 #	movq %rax,%rax
@@ -797,8 +783,6 @@ L.10:
 	jmp L.11
 L.9:
 #	returnSink
-	movq -8(%rbp),%rbx
-	addq $16,%rsp
 	popq %rbp
 	ret
 END Compare.GE
@@ -1040,19 +1024,19 @@ t.5: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.4->%rax
-t.5->%rax
+t.4->%rdi
+t.5->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.19:
-	leaq L.12(%rip),%rax
-	movq %rax,%rdi
+	leaq L.12(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -1168,19 +1152,19 @@ t.7: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.6->%rax
-t.7->%rax
+t.6->%rdi
+t.7->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.20:
-	leaq L.13(%rip),%rax
-	movq %rax,%rdi
+	leaq L.13(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

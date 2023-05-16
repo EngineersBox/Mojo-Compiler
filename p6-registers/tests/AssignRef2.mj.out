@@ -128,7 +128,7 @@ AssignRef2.1.x <= t.0
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.1->%rax
+t.1->%rdi
 t.0->%rax
 AssignRef2.1.x->%rax
 # Assembly code:
@@ -137,8 +137,8 @@ AssignRef2:
 	pushq %rbp
 	movq %rsp,%rbp
 L.2:
-	movabsq $8,%rax
-	movq %rax,%rdi
+	movabsq $8,%rdi
+#	movq %rdi,%rdi
 	call malloc
 #	movq %rax,%rax
 	movq $0,0(%rax)
@@ -337,19 +337,19 @@ t.3: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.2->%rax
-t.3->%rax
+t.2->%rdi
+t.3->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.4:
-	leaq L.0(%rip),%rax
-	movq %rax,%rdi
+	leaq L.0(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -465,19 +465,19 @@ t.5: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.4->%rax
-t.5->%rax
+t.4->%rdi
+t.5->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.5:
-	leaq L.1(%rip),%rax
-	movq %rax,%rdi
+	leaq L.1(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

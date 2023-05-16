@@ -563,22 +563,22 @@ t.0 <= t.8
 %r14->%r14
 %r15->%r15
 t.1->%rdx
-t.0->%rcx
-t.6->%rbx
-t.7->%rax
+t.0->%rax
+t.6->%rcx
+t.7->%rbx
 t.8->%rax
-t.2->%rcx
+t.2->%rax
 t.3->%rsi
 t.4->%rdx
-ReturnArray.foo.1.1.i->%rcx
-t.9->%rbx
-t.11->%rax
-t.10->%rax
+ReturnArray.foo.1.1.i->%rax
+t.9->%rcx
+t.11->%rbx
+t.10->%rbx
 t.12->%rax
-t.13->%rax
+t.13->%rbx
 t.5->%rbx
-t.14->%rax
-t.15->%rax
+t.14->%rsi
+t.15->%rdx
 # Assembly code:
 	.text
 ReturnArray.foo:
@@ -589,48 +589,48 @@ ReturnArray.foo:
 	movq %rdi,-8(%rbp)
 L.10:
 	movq $3,%rdx
-	xorq %rcx,%rcx
-	cmpq %rdx,%rcx
+	xorq %rax,%rax
+	cmpq %rdx,%rax
 	jge L.2
 L.1:
-	movq %rbp,%rbx
-	movq %rcx,%rax
-	shlq $3,%rax
-	addq %rax,%rbx
-	movq $0,-32(%rbx)
-	movq %rcx,%rax
+	movq %rbp,%rcx
+	movq %rax,%rbx
+	shlq $3,%rbx
+	addq %rbx,%rcx
+	movq $0,-32(%rcx)
+#	movq %rax,%rax
 	addq $1,%rax
-	movq %rax,%rcx
-	cmpq %rdx,%rcx
+#	movq %rax,%rax
+	cmpq %rdx,%rax
 	jl L.1
 L.2:
-	xorq %rcx,%rcx
+	xorq %rax,%rax
 	movq $2,%rsi
 	movq $1,%rdx
 L.3:
-#	movq %rcx,%rcx
-	movq %rbp,%rbx
-	movq %rcx,%rax
-	shlq $3,%rax
 #	movq %rax,%rax
-	addq $-32,%rax
-	addq %rax,%rbx
-	movq %rcx,0(%rbx)
-	movq %rcx,%rax
+	movq %rbp,%rcx
+	movq %rax,%rbx
+	shlq $3,%rbx
+#	movq %rbx,%rbx
+	addq $-32,%rbx
+	addq %rbx,%rcx
+	movq %rax,0(%rcx)
+#	movq %rax,%rax
 	addq %rdx,%rax
-	movq %rax,%rcx
+#	movq %rax,%rax
 L.4:
-	cmpq %rsi,%rcx
+	cmpq %rsi,%rax
 	jle L.3
 L.5:
-	movq -8(%rbp),%rax
-	movq %rax,%rbx
+	movq -8(%rbp),%rbx
+#	movq %rbx,%rbx
 	movq %rbx,%rdi
-	movq %rbp,%rax
-	addq $-32,%rax
-	movq %rax,%rsi
-	movabsq $24,%rax
-	movq %rax,%rdx
+	movq %rbp,%rsi
+	addq $-32,%rsi
+#	movq %rsi,%rsi
+	movabsq $24,%rdx
+#	movq %rdx,%rdx
 	call memmove
 	movq %rbx,%rax
 L.0:
@@ -1046,66 +1046,64 @@ t.26 <= t.27
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.17->%rax
-t.16->%rbx
-t.18->%rax
-t.19->%rax
-t.21->%rax
-t.20->%rax
-t.22->%rax
-t.24->%rax
-t.23->%rax
-t.25->%rax
-t.27->%rax
-t.26->%rax
-t.28->%rax
+t.17->%rdi
+t.16->%rax
+t.18->%rdi
+t.19->%rdx
+t.21->%rdi
+t.20->%rdi
+t.22->%rdi
+t.24->%rdi
+t.23->%rdi
+t.25->%rdi
+t.27->%rdi
+t.26->%rdi
+t.28->%rdi
 # Assembly code:
 	.text
 ReturnArray:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $64,%rsp
-	movq %rbx, -56(%rbp)
+	subq $48,%rsp
 L.11:
-	movq %rbp,%rax
-	addq $-48,%rax
-	movq %rax,%rdi
+	movq %rbp,%rdi
+	addq $-48,%rdi
+#	movq %rdi,%rdi
 	call ReturnArray.foo
-	movq %rax,%rbx
-	movq %rbp,%rax
-	addq $-24,%rax
-	movq %rax,%rdi
-	movq %rbx,%rsi
-	movabsq $24,%rax
-	movq %rax,%rdx
+#	movq %rax,%rax
+	movq %rbp,%rdi
+	addq $-24,%rdi
+#	movq %rdi,%rdi
+	movq %rax,%rsi
+	movabsq $24,%rdx
+#	movq %rdx,%rdx
 	call memmove
-	movq -24(%rbp),%rax
-#	movq %rax,%rax
-	addq $48,%rax
-	movq %rax,%rdi
+	movq -24(%rbp),%rdi
+#	movq %rdi,%rdi
+	addq $48,%rdi
+#	movq %rdi,%rdi
 	call putchar
-	movabsq $10,%rax
-	movq %rax,%rdi
+	movabsq $10,%rdi
+#	movq %rdi,%rdi
 	call putchar
-	movq -16(%rbp),%rax
-#	movq %rax,%rax
-	addq $48,%rax
-	movq %rax,%rdi
+	movq -16(%rbp),%rdi
+#	movq %rdi,%rdi
+	addq $48,%rdi
+#	movq %rdi,%rdi
 	call putchar
-	movabsq $10,%rax
-	movq %rax,%rdi
+	movabsq $10,%rdi
+#	movq %rdi,%rdi
 	call putchar
-	movq -8(%rbp),%rax
-#	movq %rax,%rax
-	addq $48,%rax
-	movq %rax,%rdi
+	movq -8(%rbp),%rdi
+#	movq %rdi,%rdi
+	addq $48,%rdi
+#	movq %rdi,%rdi
 	call putchar
-	movabsq $10,%rax
-	movq %rax,%rdi
+	movabsq $10,%rdi
+#	movq %rdi,%rdi
 	call putchar
 #	returnSink
-	movq -56(%rbp),%rbx
-	addq $64,%rsp
+	addq $48,%rsp
 	popq %rbp
 	ret
 L.7:
@@ -1301,19 +1299,19 @@ t.30: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.29->%rax
-t.30->%rax
+t.29->%rdi
+t.30->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.13:
-	leaq L.8(%rip),%rax
-	movq %rax,%rdi
+	leaq L.8(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -1429,19 +1427,19 @@ t.32: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.31->%rax
-t.32->%rax
+t.31->%rdi
+t.32->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.14:
-	leaq L.9(%rip),%rax
-	movq %rax,%rdi
+	leaq L.9(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

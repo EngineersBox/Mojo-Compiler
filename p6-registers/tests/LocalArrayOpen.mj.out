@@ -523,22 +523,22 @@ t.6 <= t.12
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.0->%rbx
+t.0->%r12
 t.7->%rax
-t.1->%rbx
-t.2->%rax
-t.8->%rcx
+t.1->%r12
+t.2->%rdi
+t.8->%rdi
 t.9->%rax
-t.3->%rdi
-t.10->%rax
-t.11->%rax
-t.5->%rsi
-t.12->%rax
-t.6->%rdx
-t.4->%rcx
-t.13->%rbx
-t.14->%rax
-t.15->%rax
+t.3->%rax
+t.10->%rbx
+t.11->%rcx
+t.5->%rcx
+t.12->%rbx
+t.6->%rbx
+t.4->%rdx
+t.13->%rdi
+t.14->%rsi
+t.15->%rdx
 LocalArrayOpen.1.x->%rax
 # Assembly code:
 	.text
@@ -546,50 +546,52 @@ LocalArrayOpen:
 	pushq %rbp
 	movq %rsp,%rbp
 	subq $16,%rsp
+	movq %r12, -16(%rbp)
 	movq %rbx, -8(%rbp)
 L.7:
-	movq $10,%rbx
+	movq $10,%r12
 	xorq %rax,%rax
-	cmpq %rax,%rbx
+	cmpq %rax,%r12
 	jl L.0
 L.1:
-#	movq %rbx,%rbx
-	movq $16,%rax
-	movq %rax,%rcx
-	movq %rbx,%rax
+#	movq %r12,%r12
+	movq $16,%rdi
+#	movq %rdi,%rdi
+	movq %r12,%rax
 	shlq $3,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	movq %rax,%rdi
+	addq %rax,%rdi
+#	movq %rdi,%rdi
+#	movq %rdi,%rdi
 	call malloc
-	movq %rax,%rdi
-	movq %rdi,%rax
-	addq $16,%rax
-	movq %rax,0(%rdi)
-	movq %rbx,8(%rdi)
-	movq 8(%rdi),%rax
-	movq %rax,%rsi
-	movq 0(%rdi),%rax
-	movq %rax,%rdx
-	xorq %rcx,%rcx
-	cmpq %rsi,%rcx
+#	movq %rax,%rax
+	movq %rax,%rbx
+	addq $16,%rbx
+	movq %rbx,0(%rax)
+	movq %r12,8(%rax)
+	movq 8(%rax),%rcx
+#	movq %rcx,%rcx
+	movq 0(%rax),%rbx
+#	movq %rbx,%rbx
+	xorq %rdx,%rdx
+	cmpq %rcx,%rdx
 	jge L.4
 L.2:
-	movq %rdx,%rbx
-	movq %rcx,%rax
-	shlq $3,%rax
-	addq %rax,%rbx
-	movq $0,0(%rbx)
-	movq %rcx,%rax
-	addq $1,%rax
-	movq %rax,%rcx
+	movq %rbx,%rdi
+	movq %rdx,%rsi
+	shlq $3,%rsi
+	addq %rsi,%rdi
+	movq $0,0(%rdi)
+#	movq %rdx,%rdx
+	addq $1,%rdx
+#	movq %rdx,%rdx
 L.3:
-	cmpq %rsi,%rcx
+	cmpq %rcx,%rdx
 	jl L.2
 L.4:
-	movq %rdi,%rax
+#	movq %rax,%rax
 #	returnSink
 	movq -8(%rbp),%rbx
+	movq -16(%rbp),%r12
 	addq $16,%rsp
 	popq %rbp
 	ret
@@ -786,19 +788,19 @@ t.17: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.16->%rax
-t.17->%rax
+t.16->%rdi
+t.17->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.9:
-	leaq L.5(%rip),%rax
-	movq %rax,%rdi
+	leaq L.5(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -914,19 +916,19 @@ t.19: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.18->%rax
-t.19->%rax
+t.18->%rdi
+t.19->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.10:
-	leaq L.6(%rip),%rax
-	movq %rax,%rdi
+	leaq L.6(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

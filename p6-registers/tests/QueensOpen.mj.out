@@ -2298,80 +2298,80 @@ t.0->%rbx
 t.96->%rax
 t.1->%r12
 t.97->%rax
-t.2->%rdx
-t.3->%rax
-t.98->%rcx
+t.2->%r12
+t.3->%rdi
+t.98->%rdi
 t.99->%rax
-t.4->%r8
-t.100->%rax
-t.101->%rax
-t.6->%rdi
-t.102->%rax
-t.7->%rsi
-t.5->%rdx
-t.103->%rcx
-t.104->%rax
-t.105->%rax
+t.4->%rax
+t.100->%rcx
+t.101->%rdx
+t.6->%rdx
+t.102->%rcx
+t.7->%rcx
+t.5->%rsi
+t.103->%r8
+t.104->%rdi
+t.105->%rsi
 t.8->%rbx
 t.106->%rax
 t.9->%r12
 t.107->%rax
-t.10->%rdx
-t.11->%rax
-t.108->%rcx
+t.10->%r12
+t.11->%rdi
+t.108->%rdi
 t.109->%rax
-t.12->%r8
-t.110->%rax
-t.111->%rax
-t.14->%rdi
-t.112->%rax
-t.15->%rsi
-t.13->%rdx
-t.113->%rcx
-t.114->%rax
-t.115->%rax
+t.12->%rax
+t.110->%rcx
+t.111->%rdx
+t.14->%rdx
+t.112->%rcx
+t.15->%rcx
+t.13->%rsi
+t.113->%r8
+t.114->%rdi
+t.115->%rsi
 t.16->%rbx
 t.116->%rax
-t.119->%rax
-t.118->%rax
-t.117->%rax
+t.119->%r12
+t.118->%r12
+t.117->%r12
 t.17->%r12
 t.120->%rax
-t.18->%rdx
-t.19->%rax
-t.121->%rcx
+t.18->%r12
+t.19->%rdi
+t.121->%rdi
 t.122->%rax
-t.20->%r8
-t.123->%rax
-t.124->%rax
-t.22->%rdi
-t.125->%rax
-t.23->%rsi
-t.21->%rdx
-t.126->%rcx
-t.127->%rax
-t.128->%rax
+t.20->%rax
+t.123->%rcx
+t.124->%rdx
+t.22->%rdx
+t.125->%rcx
+t.23->%rcx
+t.21->%rsi
+t.126->%r8
+t.127->%rdi
+t.128->%rsi
 t.24->%rbx
 t.129->%rax
-t.132->%rax
-t.131->%rax
-t.130->%rax
+t.132->%r12
+t.131->%r12
+t.130->%r12
 t.25->%r12
 t.133->%rax
-t.26->%rdx
-t.27->%rax
-t.134->%rcx
+t.26->%r12
+t.27->%rdi
+t.134->%rdi
 t.135->%rax
-t.28->%r8
-t.136->%rax
-t.137->%rax
-t.30->%rdi
-t.138->%rax
-t.31->%rsi
-t.29->%rdx
-t.139->%rcx
-t.140->%rax
-t.141->%rax
+t.28->%rax
+t.136->%rcx
+t.137->%rdx
+t.30->%rdx
+t.138->%rcx
+t.31->%rcx
+t.29->%rsi
+t.139->%r8
+t.140->%rdi
+t.141->%rsi
 # Assembly code:
 	.text
 QueensOpen.Init:
@@ -2392,41 +2392,41 @@ L.2:
 	cmpq %rax,%r12
 	jl L.3
 L.4:
-	movq %r12,%rdx
-	movq $16,%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
+#	movq %r12,%r12
+	movq $16,%rdi
+#	movq %rdi,%rdi
+	movq %r12,%rax
 	shlq $3,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	movq %rax,%rdi
+	addq %rax,%rdi
+#	movq %rdi,%rdi
+#	movq %rdi,%rdi
 	call malloc
-	movq %rax,%r8
-	movq %r8,%rax
-	addq $16,%rax
-	movq %rax,0(%r8)
-	movq %r12,8(%r8)
-	movq 8(%r8),%rax
-	movq %rax,%rdi
-	movq 0(%r8),%rax
-	movq %rax,%rsi
-	xorq %rdx,%rdx
-	cmpq %rdi,%rdx
+#	movq %rax,%rax
+	movq %rax,%rcx
+	addq $16,%rcx
+	movq %rcx,0(%rax)
+	movq %r12,8(%rax)
+	movq 8(%rax),%rdx
+#	movq %rdx,%rdx
+	movq 0(%rax),%rcx
+#	movq %rcx,%rcx
+	xorq %rsi,%rsi
+	cmpq %rdx,%rsi
 	jge L.7
 L.5:
-	movq %rsi,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $0,0(%rcx)
-	movq %rdx,%rax
-	addq $1,%rax
-	movq %rax,%rdx
+	movq %rcx,%r8
+	movq %rsi,%rdi
+	shlq $3,%rdi
+	addq %rdi,%r8
+	movq $0,0(%r8)
+#	movq %rsi,%rsi
+	addq $1,%rsi
+#	movq %rsi,%rsi
 L.6:
-	cmpq %rdi,%rdx
+	cmpq %rdx,%rsi
 	jl L.5
 L.7:
-	movq %r8,0(%rbx)
+	movq %rax,0(%rbx)
 #	movq %rbx,%rbx
 	xorq %rax,%rax
 	cmpq %rax,%rbx
@@ -2437,141 +2437,141 @@ L.8:
 	cmpq %rax,%r12
 	jl L.3
 L.9:
-	movq %r12,%rdx
-	movq $16,%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
+#	movq %r12,%r12
+	movq $16,%rdi
+#	movq %rdi,%rdi
+	movq %r12,%rax
 	shlq $3,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	movq %rax,%rdi
+	addq %rax,%rdi
+#	movq %rdi,%rdi
+#	movq %rdi,%rdi
 	call malloc
-	movq %rax,%r8
-	movq %r8,%rax
-	addq $16,%rax
-	movq %rax,0(%r8)
-	movq %r12,8(%r8)
-	movq 8(%r8),%rax
-	movq %rax,%rdi
-	movq 0(%r8),%rax
-	movq %rax,%rsi
-	xorq %rdx,%rdx
-	cmpq %rdi,%rdx
+#	movq %rax,%rax
+	movq %rax,%rcx
+	addq $16,%rcx
+	movq %rcx,0(%rax)
+	movq %r12,8(%rax)
+	movq 8(%rax),%rdx
+#	movq %rdx,%rdx
+	movq 0(%rax),%rcx
+#	movq %rcx,%rcx
+	xorq %rsi,%rsi
+	cmpq %rdx,%rsi
 	jge L.12
 L.10:
-	movq %rsi,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $0,0(%rcx)
-	movq %rdx,%rax
-	addq $1,%rax
-	movq %rax,%rdx
+	movq %rcx,%r8
+	movq %rsi,%rdi
+	shlq $3,%rdi
+	addq %rdi,%r8
+	movq $0,0(%r8)
+#	movq %rsi,%rsi
+	addq $1,%rsi
+#	movq %rsi,%rsi
 L.11:
-	cmpq %rdi,%rdx
+	cmpq %rdx,%rsi
 	jl L.10
 L.12:
-	movq %r8,8(%rbx)
+	movq %rax,8(%rbx)
 #	movq %rbx,%rbx
 	xorq %rax,%rax
 	cmpq %rax,%rbx
 	je L.1
 L.13:
-	movabsq $8,%rax
-#	movq %rax,%rax
-	addq $8,%rax
-#	movq %rax,%rax
-	subq $1,%rax
-	movq %rax,%r12
+	movabsq $8,%r12
+#	movq %r12,%r12
+	addq $8,%r12
+#	movq %r12,%r12
+	subq $1,%r12
+#	movq %r12,%r12
 	xorq %rax,%rax
 	cmpq %rax,%r12
 	jl L.3
 L.14:
-	movq %r12,%rdx
-	movq $16,%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
+#	movq %r12,%r12
+	movq $16,%rdi
+#	movq %rdi,%rdi
+	movq %r12,%rax
 	shlq $3,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	movq %rax,%rdi
+	addq %rax,%rdi
+#	movq %rdi,%rdi
+#	movq %rdi,%rdi
 	call malloc
-	movq %rax,%r8
-	movq %r8,%rax
-	addq $16,%rax
-	movq %rax,0(%r8)
-	movq %r12,8(%r8)
-	movq 8(%r8),%rax
-	movq %rax,%rdi
-	movq 0(%r8),%rax
-	movq %rax,%rsi
-	xorq %rdx,%rdx
-	cmpq %rdi,%rdx
+#	movq %rax,%rax
+	movq %rax,%rcx
+	addq $16,%rcx
+	movq %rcx,0(%rax)
+	movq %r12,8(%rax)
+	movq 8(%rax),%rdx
+#	movq %rdx,%rdx
+	movq 0(%rax),%rcx
+#	movq %rcx,%rcx
+	xorq %rsi,%rsi
+	cmpq %rdx,%rsi
 	jge L.17
 L.15:
-	movq %rsi,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $0,0(%rcx)
-	movq %rdx,%rax
-	addq $1,%rax
-	movq %rax,%rdx
+	movq %rcx,%r8
+	movq %rsi,%rdi
+	shlq $3,%rdi
+	addq %rdi,%r8
+	movq $0,0(%r8)
+#	movq %rsi,%rsi
+	addq $1,%rsi
+#	movq %rsi,%rsi
 L.16:
-	cmpq %rdi,%rdx
+	cmpq %rdx,%rsi
 	jl L.15
 L.17:
-	movq %r8,16(%rbx)
+	movq %rax,16(%rbx)
 #	movq %rbx,%rbx
 	xorq %rax,%rax
 	cmpq %rax,%rbx
 	je L.1
 L.18:
-	movabsq $8,%rax
-#	movq %rax,%rax
-	addq $8,%rax
-#	movq %rax,%rax
-	subq $1,%rax
-	movq %rax,%r12
+	movabsq $8,%r12
+#	movq %r12,%r12
+	addq $8,%r12
+#	movq %r12,%r12
+	subq $1,%r12
+#	movq %r12,%r12
 	xorq %rax,%rax
 	cmpq %rax,%r12
 	jl L.3
 L.19:
-	movq %r12,%rdx
-	movq $16,%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
+#	movq %r12,%r12
+	movq $16,%rdi
+#	movq %rdi,%rdi
+	movq %r12,%rax
 	shlq $3,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	movq %rax,%rdi
+	addq %rax,%rdi
+#	movq %rdi,%rdi
+#	movq %rdi,%rdi
 	call malloc
-	movq %rax,%r8
-	movq %r8,%rax
-	addq $16,%rax
-	movq %rax,0(%r8)
-	movq %r12,8(%r8)
-	movq 8(%r8),%rax
-	movq %rax,%rdi
-	movq 0(%r8),%rax
-	movq %rax,%rsi
-	xorq %rdx,%rdx
-	cmpq %rdi,%rdx
+#	movq %rax,%rax
+	movq %rax,%rcx
+	addq $16,%rcx
+	movq %rcx,0(%rax)
+	movq %r12,8(%rax)
+	movq 8(%rax),%rdx
+#	movq %rdx,%rdx
+	movq 0(%rax),%rcx
+#	movq %rcx,%rcx
+	xorq %rsi,%rsi
+	cmpq %rdx,%rsi
 	jge L.22
 L.20:
-	movq %rsi,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $0,0(%rcx)
-	movq %rdx,%rax
-	addq $1,%rax
-	movq %rax,%rdx
+	movq %rcx,%r8
+	movq %rsi,%rdi
+	shlq $3,%rdi
+	addq %rdi,%r8
+	movq $0,0(%r8)
+#	movq %rsi,%rsi
+	addq $1,%rsi
+#	movq %rsi,%rsi
 L.21:
-	cmpq %rdi,%rdx
+	cmpq %rdx,%rsi
 	jl L.20
 L.22:
-	movq %r8,24(%rbx)
+	movq %rax,24(%rbx)
 	movq %rbx,%rax
 L.0:
 #	returnSink
@@ -6353,168 +6353,168 @@ QueensOpen.Solve.c <= %rsi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-QueensOpen.Solve.self->%r14
-QueensOpen.Solve.c->%r13
+QueensOpen.Solve.self->%rbx
+QueensOpen.Solve.c->%r15
 t.32->%rbx
 t.142->%rax
 t.143->%rax
-t.33->%rbx
-t.144->%rax
+t.33->%rax
+t.144->%rcx
 t.145->%rax
-t.34->%r15
+t.34->%r14
 t.36->%rbx
 t.146->%rax
 t.147->%rax
-t.37->%rbx
-t.148->%rax
-t.150->%rax
-t.149->%rax
-t.35->%rbx
-t.38->%r12
-QueensOpen.Solve.1.r->%r15
-t.39->%rcx
+t.37->%rax
+t.148->%rcx
+t.150->%r12
+t.149->%r12
+t.35->%r12
+t.38->%r13
+QueensOpen.Solve.1.r->%r14
+t.39->%rbx
 t.151->%rax
 t.152->%rax
-t.40->%rcx
-t.153->%rax
-t.42->%rcx
-t.41->%rdx
-t.154->%rax
-t.155->%rax
+t.40->%rax
+t.153->%rcx
+t.42->%rax
+t.41->%rcx
+t.154->%rdx
+t.155->%rdx
 t.157->%rax
-t.156->%rcx
-t.158->%rax
+t.156->%rax
+t.158->%rcx
 t.159->%rcx
 t.160->%rax
-t.161->%rax
-t.43->%rcx
+t.161->%r14
+t.43->%rbx
 t.162->%rax
 t.163->%rax
-t.44->%rcx
-t.164->%rax
-t.46->%rcx
-t.165->%rax
-t.45->%rdx
-t.166->%rax
-t.167->%rax
+t.44->%rax
+t.164->%rcx
+t.46->%rax
+t.165->%rcx
+t.45->%rcx
+t.166->%rdx
+t.167->%rdx
 t.169->%rax
-t.168->%rcx
-t.170->%rax
+t.168->%rax
+t.170->%rcx
 t.171->%rcx
 t.172->%rax
-t.47->%rcx
+t.47->%rbx
 t.173->%rax
 t.174->%rax
-t.48->%rcx
-t.175->%rax
-t.50->%rsi
+t.48->%rax
+t.175->%rcx
+t.50->%rax
 t.177->%rcx
-t.179->%rax
-t.178->%rax
-t.176->%rax
-t.49->%rdx
-t.180->%rax
-t.181->%rax
+t.179->%rdx
+t.178->%rdx
+t.176->%rcx
+t.49->%rcx
+t.180->%rdx
+t.181->%rdx
 t.183->%rax
-t.182->%rcx
-t.184->%rax
+t.182->%rax
+t.184->%rcx
 t.185->%rcx
 t.186->%rax
-t.51->%rcx
+t.51->%rbx
 t.187->%rax
 t.188->%rax
-t.52->%rcx
-t.189->%rax
-t.54->%rcx
-t.53->%rdx
-t.190->%rax
-t.191->%rax
+t.52->%rax
+t.189->%rcx
+t.54->%rax
+t.53->%rcx
+t.190->%rdx
+t.191->%rdx
 t.193->%rax
-t.192->%rcx
-t.194->%rax
-t.55->%rcx
+t.192->%rax
+t.194->%rcx
+t.55->%rbx
 t.195->%rax
 t.196->%rax
-t.56->%rcx
-t.197->%rax
-t.58->%rcx
-t.198->%rax
-t.57->%rdx
-t.199->%rax
-t.200->%rax
+t.56->%rax
+t.197->%rcx
+t.58->%rax
+t.198->%rcx
+t.57->%rcx
+t.199->%rdx
+t.200->%rdx
 t.202->%rax
-t.201->%rcx
-t.203->%rax
-t.59->%rcx
+t.201->%rax
+t.203->%rcx
+t.59->%rbx
 t.204->%rax
 t.205->%rax
-t.60->%rcx
-t.206->%rax
-t.62->%rsi
+t.60->%rax
+t.206->%rcx
+t.62->%rax
 t.208->%rcx
-t.210->%rax
-t.209->%rax
-t.207->%rax
-t.61->%rdx
-t.211->%rax
-t.212->%rax
+t.210->%rdx
+t.209->%rdx
+t.207->%rcx
+t.61->%rcx
+t.211->%rdx
+t.212->%rdx
 t.214->%rax
-t.213->%rcx
-t.215->%rax
-t.63->%rcx
+t.213->%rax
+t.215->%rcx
+t.63->%rbx
 t.216->%rax
 t.217->%rax
-t.64->%rcx
-t.218->%rax
-t.66->%rcx
-t.65->%rdx
-t.219->%rax
-t.220->%rax
+t.64->%rax
+t.218->%rcx
+t.66->%rax
+t.65->%rcx
+t.219->%rdx
+t.220->%rdx
 t.222->%rax
-t.221->%rcx
-t.223->%rax
+t.221->%rax
+t.223->%rcx
 t.224->%rax
-t.225->%rcx
-t.226->%rax
-t.67->%rcx
+t.225->%rax
+t.226->%rsi
+t.67->%rbx
 t.227->%rax
 t.228->%rax
-t.68->%rcx
-t.229->%rax
-t.70->%rcx
-t.69->%rdx
-t.230->%rax
-t.231->%rax
+t.68->%rax
+t.229->%rcx
+t.70->%rax
+t.69->%rcx
+t.230->%rdx
+t.231->%rdx
 t.233->%rax
-t.232->%rcx
-t.234->%rax
-t.71->%rcx
+t.232->%rax
+t.234->%rcx
+t.71->%rbx
 t.235->%rax
 t.236->%rax
-t.72->%rcx
-t.237->%rax
-t.74->%rcx
-t.238->%rax
-t.73->%rdx
-t.239->%rax
-t.240->%rax
+t.72->%rax
+t.237->%rcx
+t.74->%rax
+t.238->%rcx
+t.73->%rcx
+t.239->%rdx
+t.240->%rdx
 t.242->%rax
-t.241->%rcx
-t.243->%rax
-t.75->%rcx
+t.241->%rax
+t.243->%rcx
+t.75->%rbx
 t.244->%rax
-t.245->%rax
+t.245->%rcx
 t.76->%rcx
 t.246->%rax
-t.78->%rsi
-t.248->%rcx
-t.250->%rax
-t.249->%rax
+t.78->%rcx
+t.248->%rax
+t.250->%rdx
+t.249->%rdx
 t.247->%rax
-t.77->%rdx
-t.251->%rax
-t.252->%rax
-t.254->%rax
+t.77->%rax
+t.251->%rdx
+t.252->%rdx
+t.254->%rcx
 t.253->%rcx
 t.255->%rax
 # Assembly code:
@@ -6528,371 +6528,371 @@ QueensOpen.Solve:
 	movq %r13, -24(%rbp)
 	movq %r12, -16(%rbp)
 	movq %rbx, -8(%rbp)
-	movq %rdi,%r14
-	movq %rsi,%r13
+	movq %rdi,%rbx
+	movq %rsi,%r15
 L.104:
-	movq %r14,%rbx
+#	movq %rbx,%rbx
 	xorq %rax,%rax
 	cmpq %rax,%rbx
 	je L.27
 L.28:
 	movq 8(%rbx),%rax
-	movq %rax,%rbx
-	xorq %rax,%rax
-	cmpq %rax,%rbx
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.29:
-	movq 8(%rbx),%rax
-	cmpq %rax,%r13
+	movq 8(%rax),%rax
+	cmpq %rax,%r15
 	je L.24
 L.25:
-	xorq %r15,%r15
-	movq %r14,%rbx
+	xorq %r14,%r14
+#	movq %rbx,%rbx
 	xorq %rax,%rax
 	cmpq %rax,%rbx
 	je L.27
 L.30:
 	movq 0(%rbx),%rax
-	movq %rax,%rbx
-	xorq %rax,%rax
-	cmpq %rax,%rbx
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.31:
-	movq 8(%rbx),%rax
-#	movq %rax,%rax
-	subq $1,%rax
-	movq %rax,%rbx
-	movq $1,%r12
+	movq 8(%rax),%r12
+#	movq %r12,%r12
+	subq $1,%r12
+#	movq %r12,%r12
+	movq $1,%r13
 L.33:
-	cmpq %rbx,%r15
+	cmpq %r12,%r14
 	jle L.32
 L.34:
 L.26:
 	jmp L.23
 L.24:
-	movq %r14,%rdi
+	movq %rbx,%rdi
 	call QueensOpen.Print
 	jmp L.26
 L.32:
-#	movq %r15,%r15
-	movq %r14,%rcx
+#	movq %r14,%r14
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.39:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 0(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.40:
-#	movq %rcx,%rcx
-	movq %r15,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+#	movq %rax,%rax
+	movq %r14,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.42:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.43:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq 0(%rcx),%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq 0(%rax),%rcx
 	xorq %rax,%rax
 	cmpq %rax,%rcx
 	je L.38
 L.36:
-	movq %r15,%rax
-	addq %r12,%rax
-	movq %rax,%r15
+#	movq %r14,%r14
+	addq %r13,%r14
+#	movq %r14,%r14
 	jmp L.33
 L.38:
-	movq %r14,%rcx
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.44:
-	movq 16(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 16(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.45:
+#	movq %rax,%rax
+	movq %r14,%rcx
+	addq %r15,%rcx
 #	movq %rcx,%rcx
-	movq %r15,%rax
-	addq %r13,%rax
-	movq %rax,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.46:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.47:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq 0(%rcx),%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq 0(%rax),%rcx
 	xorq %rax,%rax
 	cmpq %rax,%rcx
 	jne L.36
 L.37:
-	movq %r14,%rcx
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.48:
-	movq 24(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 24(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.49:
-	movq %rcx,%rsi
-	movq %r15,%rcx
-	movabsq $8,%rax
 #	movq %rax,%rax
-	subq $1,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	subq %r13,%rax
-	movq %rax,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+	movq %r14,%rcx
+	movabsq $8,%rdx
+#	movq %rdx,%rdx
+	subq $1,%rdx
+	addq %rdx,%rcx
+#	movq %rcx,%rcx
+	subq %r15,%rcx
+#	movq %rcx,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.50:
-	movq 8(%rsi),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.51:
-	movq 0(%rsi),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq 0(%rcx),%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq 0(%rax),%rcx
 	xorq %rax,%rax
 	cmpq %rax,%rcx
 	jne L.36
 L.35:
-	movq %r14,%rcx
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.52:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 0(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.53:
-#	movq %rcx,%rcx
-	movq %r15,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+#	movq %rax,%rax
+	movq %r14,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.54:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.55:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $1,0(%rcx)
-	movq %r14,%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq $1,0(%rax)
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.56:
-	movq 16(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 16(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.57:
+#	movq %rax,%rax
+	movq %r14,%rcx
+	addq %r15,%rcx
 #	movq %rcx,%rcx
-	movq %r15,%rax
-	addq %r13,%rax
-	movq %rax,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.58:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.59:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $1,0(%rcx)
-	movq %r14,%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq $1,0(%rax)
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.60:
-	movq 24(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 24(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.61:
-	movq %rcx,%rsi
-	movq %r15,%rcx
-	movabsq $8,%rax
 #	movq %rax,%rax
-	subq $1,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	subq %r13,%rax
-	movq %rax,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+	movq %r14,%rcx
+	movabsq $8,%rdx
+#	movq %rdx,%rdx
+	subq $1,%rdx
+	addq %rdx,%rcx
+#	movq %rcx,%rcx
+	subq %r15,%rcx
+#	movq %rcx,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.62:
-	movq 8(%rsi),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.63:
-	movq 0(%rsi),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $1,0(%rcx)
-	movq %r14,%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq $1,0(%rax)
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.64:
-	movq 8(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 8(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.65:
-#	movq %rcx,%rcx
-	movq %r13,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+#	movq %rax,%rax
+	movq %r15,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.66:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.67:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq %r15,0(%rcx)
-	movq -8(%r14),%rax
-	movq 8(%rax),%rcx
-	movq %r14,%rdi
-	movq %r13,%rax
-	addq $1,%rax
-	movq %rax,%rsi
-	call *%rcx
-	movq %r14,%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq %r14,0(%rax)
+	movq -8(%rbx),%rax
+	movq 8(%rax),%rax
+	movq %rbx,%rdi
+	movq %r15,%rsi
+	addq $1,%rsi
+#	movq %rsi,%rsi
+	call *%rax
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.68:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 0(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.69:
-#	movq %rcx,%rcx
-	movq %r15,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+#	movq %rax,%rax
+	movq %r14,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.70:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.71:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $0,0(%rcx)
-	movq %r14,%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq $0,0(%rax)
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.72:
-	movq 16(%rcx),%rax
-	movq %rax,%rcx
-	xorq %rax,%rax
-	cmpq %rax,%rcx
+	movq 16(%rbx),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
 	je L.27
 L.73:
+#	movq %rax,%rax
+	movq %r14,%rcx
+	addq %r15,%rcx
 #	movq %rcx,%rcx
-	movq %r15,%rax
-	addq %r13,%rax
-	movq %rax,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
 	jl L.41
 L.74:
-	movq 8(%rcx),%rax
-	cmpq %rax,%rdx
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
 	jge L.41
 L.75:
-	movq 0(%rcx),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
-	shlq $3,%rax
-	addq %rax,%rcx
-	movq $0,0(%rcx)
-	movq %r14,%rcx
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq $0,0(%rax)
+#	movq %rbx,%rbx
 	xorq %rax,%rax
-	cmpq %rax,%rcx
+	cmpq %rax,%rbx
 	je L.27
 L.76:
-	movq 24(%rcx),%rax
-	movq %rax,%rcx
+	movq 24(%rbx),%rcx
+#	movq %rcx,%rcx
 	xorq %rax,%rax
 	cmpq %rax,%rcx
 	je L.27
 L.77:
-	movq %rcx,%rsi
-	movq %r15,%rcx
-	movabsq $8,%rax
+#	movq %rcx,%rcx
+	movq %r14,%rax
+	movabsq $8,%rdx
+#	movq %rdx,%rdx
+	subq $1,%rdx
+	addq %rdx,%rax
 #	movq %rax,%rax
-	subq $1,%rax
-	addq %rax,%rcx
-	movq %rcx,%rax
-	subq %r13,%rax
-	movq %rax,%rdx
-	xorq %rax,%rax
-	cmpq %rax,%rdx
+	subq %r15,%rax
+#	movq %rax,%rax
+	xorq %rdx,%rdx
+	cmpq %rdx,%rax
 	jl L.41
 L.78:
-	movq 8(%rsi),%rax
-	cmpq %rax,%rdx
+	movq 8(%rcx),%rdx
+	cmpq %rdx,%rax
 	jge L.41
 L.79:
-	movq 0(%rsi),%rax
-	movq %rax,%rcx
-	movq %rdx,%rax
+	movq 0(%rcx),%rcx
+#	movq %rcx,%rcx
+#	movq %rax,%rax
 	shlq $3,%rax
 	addq %rax,%rcx
 	movq $0,0(%rcx)
@@ -8036,3 +8036,1209 @@ QueensOpen.Print.self <= %rdi
 # Spills:
 t.83
 t.80
+# Instructions (after spilling):
+	movq %rdi,QueensOpen.Print.self
+L.105:
+	xorq t.79,t.79
+	movq QueensOpen.Print.self,t.81
+	xorq t.256,t.256
+	cmpq t.256,t.81
+	je L.81
+L.82:
+	movq 8(t.81),t.257
+	movq t.257,t.82
+	xorq t.258,t.258
+	cmpq t.258,t.82
+	je L.81
+L.83:
+	movq 8(t.82),t.260
+	movq t.260,t.259
+	subq $1,t.259
+	movq t.259,t.285
+	movq t.285,-16(%rbp)
+	movq $1,t.282
+	movq t.282,-8(%rbp)
+L.85:
+	movq -16(%rbp),t.287
+	movq t.287,t.286
+	cmpq t.286,t.79
+	jle L.84
+L.86:
+	movabsq $10,t.261
+	movq t.261,%rdi
+	call putchar
+	jmp L.80
+L.84:
+	movq t.79,QueensOpen.Print.1.i
+	xorq t.84,t.84
+	movq QueensOpen.Print.self,t.86
+	xorq t.262,t.262
+	cmpq t.262,t.86
+	je L.81
+L.87:
+	movq 0(t.86),t.263
+	movq t.263,t.87
+	xorq t.264,t.264
+	cmpq t.264,t.87
+	je L.81
+L.88:
+	movq 8(t.87),t.266
+	movq t.266,t.265
+	subq $1,t.265
+	movq t.265,t.85
+	movq $1,t.88
+L.90:
+	cmpq t.85,t.84
+	jle L.89
+L.91:
+	movabsq $10,t.267
+	movq t.267,%rdi
+	call putchar
+	movq t.79,t.268
+	movq -8(%rbp),t.284
+	movq t.284,t.283
+	addq t.283,t.268
+	movq t.268,t.79
+	jmp L.85
+L.89:
+	movq t.84,QueensOpen.Print.1.1.j
+	movabsq $32,t.269
+	movq t.269,%rdi
+	call putchar
+	movq QueensOpen.Print.self,t.89
+	xorq t.270,t.270
+	cmpq t.270,t.89
+	je L.81
+L.96:
+	movq 8(t.89),t.271
+	movq t.271,t.90
+	xorq t.272,t.272
+	cmpq t.272,t.90
+	je L.81
+L.97:
+	movq t.90,t.92
+	movq QueensOpen.Print.1.i,t.91
+	xorq t.273,t.273
+	cmpq t.273,t.91
+	jl L.92
+L.98:
+	movq 8(t.92),t.274
+	cmpq t.274,t.91
+	jge L.92
+L.99:
+	movq 0(t.92),t.276
+	movq t.276,t.275
+	movq t.91,t.277
+	shlq $3,t.277
+	addq t.277,t.275
+	movq 0(t.275),t.278
+	cmpq QueensOpen.Print.1.1.j,t.278
+	je L.93
+L.94:
+	movabsq $46,t.279
+	movq t.279,%rdi
+	call putchar
+L.95:
+	movq t.84,t.280
+	addq t.88,t.280
+	movq t.280,t.84
+	jmp L.90
+L.93:
+	movabsq $81,t.281
+	movq t.281,%rdi
+	call putchar
+	jmp L.95
+L.80:
+#	returnSink
+# Control Flow Graph:
+0: QueensOpen.Print.self <- %rdi ; goto 1 
+1: t.79 t.81 t.256 <- QueensOpen.Print.self ; goto 2 
+2: t.257 t.82 t.258 <- t.81 ; goto 3 
+3: t.260 t.259 t.285 t.282 <- t.82 %rbp ; goto 4 
+4: t.287 t.286 <- %rbp t.79 ; goto 6 5 
+5: t.261 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- ; goto 19 
+6: QueensOpen.Print.1.i t.84 t.86 t.262 <- t.79 QueensOpen.Print.self ; goto 7 
+7: t.263 t.87 t.264 <- t.86 ; goto 8 
+8: t.266 t.265 t.85 t.88 <- t.87 ; goto 9 
+9: <- t.84 t.85 ; goto 11 10 
+10: t.267 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.268 t.284 t.283 t.79 <- t.79 %rbp ; goto 4 
+11: QueensOpen.Print.1.1.j t.269 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.89 t.270 <- t.84 QueensOpen.Print.self ; goto 12 
+12: t.271 t.90 t.272 <- t.89 ; goto 13 
+13: t.92 t.91 t.273 <- t.90 QueensOpen.Print.1.i ; goto 14 
+14: t.274 <- t.92 t.91 ; goto 15 
+15: t.276 t.275 t.277 t.278 <- t.92 t.91 QueensOpen.Print.1.1.j ; goto 18 16 
+16: t.279 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- ; goto 17 
+17: t.280 t.84 <- t.84 t.88 ; goto 9 
+18: t.281 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- ; goto 17 
+19: <- %rsp %rbp ; goto 
+# Interference Graph:
+%rax: 
+%rbx: 
+%rcx: 
+%rdx: 
+%rsp: 
+%rbp: 
+%rsi: 
+%rdi: 
+%r8: 
+%r9: 
+%r10: 
+%r11: 
+%r12: 
+%r13: 
+%r14: 
+%r15: 
+QueensOpen.Print.self: %rbp %rsp t.256 t.79 t.258 t.82 t.257 t.282 t.285 t.259 t.260 t.286 t.287 t.262 t.84 QueensOpen.Print.1.i t.264 t.87 t.263 t.88 t.85 t.265 t.266 t.268 t.283 t.284 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.267 t.270 t.269 QueensOpen.Print.1.1.j t.272 t.90 t.271 t.273 t.91 t.92 t.274 t.278 t.275 t.277 t.276 t.279 t.280 t.281 
+t.79: t.256 t.81 %rbp QueensOpen.Print.self %rsp t.258 t.82 t.257 t.282 t.285 t.259 t.260 t.286 t.287 t.262 t.86 t.84 t.264 t.87 t.263 t.88 t.85 t.265 t.266 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.267 t.270 t.89 t.269 QueensOpen.Print.1.1.j t.272 t.90 t.271 t.273 t.91 t.92 t.274 t.278 t.275 t.277 t.276 t.279 t.280 t.281 
+t.81: t.256 %rbp t.79 %rsp 
+t.256: t.81 %rbp t.79 QueensOpen.Print.self %rsp 
+t.257: %rbp t.79 QueensOpen.Print.self %rsp 
+t.82: t.258 %rbp t.79 QueensOpen.Print.self %rsp 
+t.258: t.82 %rbp t.79 QueensOpen.Print.self %rsp 
+t.260: %rbp t.79 QueensOpen.Print.self %rsp 
+t.259: %rbp t.79 QueensOpen.Print.self %rsp 
+t.285: %rbp t.79 QueensOpen.Print.self %rsp 
+t.282: %rbp t.79 QueensOpen.Print.self %rsp 
+t.287: t.79 QueensOpen.Print.self %rbp %rsp 
+t.286: t.79 QueensOpen.Print.self %rbp %rsp 
+t.261: %rsp %rbp 
+QueensOpen.Print.1.i: t.262 t.86 t.84 QueensOpen.Print.self %rbp %rsp t.264 t.87 t.263 t.88 t.85 t.265 t.266 t.270 t.89 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.269 QueensOpen.Print.1.1.j t.272 t.90 t.271 t.273 t.92 t.274 t.278 t.275 t.277 t.276 t.279 t.280 t.281 
+t.84: t.262 t.86 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp t.264 t.87 t.263 t.88 t.85 t.265 t.266 t.270 t.89 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.269 t.272 t.90 t.271 t.273 t.91 t.92 t.274 t.278 t.275 t.277 t.276 t.279 t.281 
+t.86: t.262 t.84 QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.262: t.86 t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.263: t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.87: t.264 t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.264: t.87 t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.266: t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.265: t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.85: t.88 t.84 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp t.270 t.89 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.269 QueensOpen.Print.1.1.j t.272 t.90 t.271 t.273 t.91 t.92 t.274 t.278 t.275 t.277 t.276 t.279 t.280 t.281 
+t.88: t.84 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp t.270 t.89 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.269 QueensOpen.Print.1.1.j t.272 t.90 t.271 t.273 t.91 t.92 t.274 t.278 t.275 t.277 t.276 t.279 t.280 t.281 
+t.267: %rbp QueensOpen.Print.self %rsp t.79 
+t.268: %rbp QueensOpen.Print.self %rsp t.283 t.284 
+t.284: %rbp QueensOpen.Print.self %rsp t.268 
+t.283: %rbp QueensOpen.Print.self %rsp t.268 
+QueensOpen.Print.1.1.j: t.270 t.89 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.269 QueensOpen.Print.1.i t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp t.272 t.90 t.271 t.273 t.91 t.92 t.274 t.278 t.275 t.277 t.276 
+t.269: QueensOpen.Print.1.i QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp 
+t.89: t.270 QueensOpen.Print.1.i QueensOpen.Print.1.1.j t.84 t.88 t.85 t.79 %rbp %rsp 
+t.270: t.89 QueensOpen.Print.1.i QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp 
+t.271: QueensOpen.Print.1.i QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp 
+t.90: t.272 QueensOpen.Print.1.i QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp 
+t.272: t.90 QueensOpen.Print.1.i QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp 
+t.92: t.273 t.91 QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp t.274 
+t.91: t.273 t.92 QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self t.79 %rbp %rsp t.274 t.275 t.276 
+t.273: t.92 t.91 QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.274: t.92 t.91 QueensOpen.Print.1.1.j t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.276: t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp QueensOpen.Print.1.1.j t.91 
+t.275: t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp QueensOpen.Print.1.1.j t.277 t.91 
+t.277: t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp QueensOpen.Print.1.1.j t.275 
+t.278: t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp QueensOpen.Print.1.1.j 
+t.279: t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+t.280: t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.88 t.79 %rbp %rsp 
+t.281: t.84 t.88 t.85 QueensOpen.Print.self QueensOpen.Print.1.i t.79 %rbp %rsp 
+%rdi <= t.281
+t.280 <= t.84
+t.84 <= t.280
+%rdi <= t.279
+t.275 <= t.276
+t.277 <= t.91
+t.92 <= t.90
+t.91 <= QueensOpen.Print.1.i
+t.90 <= t.271
+QueensOpen.Print.1.1.j <= t.84
+%rdi <= t.269
+t.89 <= QueensOpen.Print.self
+%rdi <= t.267
+t.268 <= t.79
+t.283 <= t.284
+t.79 <= t.268
+t.265 <= t.266
+t.85 <= t.265
+t.87 <= t.263
+QueensOpen.Print.1.i <= t.79
+t.86 <= QueensOpen.Print.self
+%rdi <= t.261
+t.286 <= t.287
+t.259 <= t.260
+t.285 <= t.259
+t.82 <= t.257
+t.81 <= QueensOpen.Print.self
+QueensOpen.Print.self <= %rdi
+# Register Allocation:
+%rax->%rax
+%rbx->%rbx
+%rcx->%rcx
+%rdx->%rdx
+%rsp->%rsp
+%rbp->%rbp
+%rsi->%rsi
+%rdi->%rdi
+%r8->%r8
+%r9->%r9
+%r10->%r10
+%r11->%r11
+%r12->%r12
+%r13->%r13
+%r14->%r14
+%r15->%r15
+QueensOpen.Print.self->%r14
+t.79->%r12
+t.81->%rax
+t.256->%rbx
+t.257->%rax
+t.82->%rax
+t.258->%rbx
+t.260->%rax
+t.259->%rax
+t.285->%rax
+t.282->%rax
+t.287->%rax
+t.286->%rax
+t.261->%rdi
+QueensOpen.Print.1.i->%r12
+t.84->%rbx
+t.86->%rax
+t.262->%rcx
+t.263->%rax
+t.87->%rax
+t.264->%rcx
+t.266->%rax
+t.265->%rax
+t.85->%r15
+t.88->%r13
+t.267->%rdi
+t.268->%rax
+t.284->%rbx
+t.283->%rbx
+QueensOpen.Print.1.1.j->%rbx
+t.269->%rdi
+t.89->%rax
+t.270->%rcx
+t.271->%rax
+t.90->%rax
+t.272->%rcx
+t.92->%rax
+t.91->%rcx
+t.273->%rdx
+t.274->%rdx
+t.276->%rax
+t.275->%rax
+t.277->%rcx
+t.278->%rax
+t.279->%rdi
+t.280->%rax
+t.281->%rdi
+# Assembly code:
+	.text
+QueensOpen.Print:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $64,%rsp
+	movq %r15, -56(%rbp)
+	movq %r14, -48(%rbp)
+	movq %r13, -40(%rbp)
+	movq %r12, -32(%rbp)
+	movq %rbx, -24(%rbp)
+	movq %rdi,%r14
+L.105:
+	xorq %r12,%r12
+	movq %r14,%rax
+	xorq %rbx,%rbx
+	cmpq %rbx,%rax
+	je L.81
+L.82:
+	movq 8(%rax),%rax
+#	movq %rax,%rax
+	xorq %rbx,%rbx
+	cmpq %rbx,%rax
+	je L.81
+L.83:
+	movq 8(%rax),%rax
+#	movq %rax,%rax
+	subq $1,%rax
+#	movq %rax,%rax
+	movq %rax,-16(%rbp)
+	movq $1,%rax
+	movq %rax,-8(%rbp)
+L.85:
+	movq -16(%rbp),%rax
+#	movq %rax,%rax
+	cmpq %rax,%r12
+	jle L.84
+L.86:
+	movabsq $10,%rdi
+#	movq %rdi,%rdi
+	call putchar
+	jmp L.80
+L.84:
+#	movq %r12,%r12
+	xorq %rbx,%rbx
+	movq %r14,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
+	je L.81
+L.87:
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
+	je L.81
+L.88:
+	movq 8(%rax),%rax
+#	movq %rax,%rax
+	subq $1,%rax
+	movq %rax,%r15
+	movq $1,%r13
+L.90:
+	cmpq %r15,%rbx
+	jle L.89
+L.91:
+	movabsq $10,%rdi
+#	movq %rdi,%rdi
+	call putchar
+	movq %r12,%rax
+	movq -8(%rbp),%rbx
+#	movq %rbx,%rbx
+	addq %rbx,%rax
+	movq %rax,%r12
+	jmp L.85
+L.89:
+#	movq %rbx,%rbx
+	movabsq $32,%rdi
+#	movq %rdi,%rdi
+	call putchar
+	movq %r14,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
+	je L.81
+L.96:
+	movq 8(%rax),%rax
+#	movq %rax,%rax
+	xorq %rcx,%rcx
+	cmpq %rcx,%rax
+	je L.81
+L.97:
+#	movq %rax,%rax
+	movq %r12,%rcx
+	xorq %rdx,%rdx
+	cmpq %rdx,%rcx
+	jl L.92
+L.98:
+	movq 8(%rax),%rdx
+	cmpq %rdx,%rcx
+	jge L.92
+L.99:
+	movq 0(%rax),%rax
+#	movq %rax,%rax
+#	movq %rcx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rax
+	movq 0(%rax),%rax
+	cmpq %rbx,%rax
+	je L.93
+L.94:
+	movabsq $46,%rdi
+#	movq %rdi,%rdi
+	call putchar
+L.95:
+	movq %rbx,%rax
+	addq %r13,%rax
+	movq %rax,%rbx
+	jmp L.90
+L.93:
+	movabsq $81,%rdi
+#	movq %rdi,%rdi
+	call putchar
+	jmp L.95
+L.80:
+#	returnSink
+	movq -24(%rbp),%rbx
+	movq -32(%rbp),%r12
+	movq -40(%rbp),%r13
+	movq -48(%rbp),%r14
+	movq -56(%rbp),%r15
+	addq $64,%rsp
+	popq %rbp
+	ret
+L.81:
+	call badPtr
+L.92:
+	call badSub
+END QueensOpen.Print
+PROCEDURE QueensOpen
+# Before canonicalization (trees):
+EXP(
+ CALL(
+  ESEQ(
+   MOVE(
+    TEMP t.95,
+    CALL(
+     ESEQ(
+      MOVE(
+       TEMP t.94,
+       ESEQ(
+        MOVE(
+         TEMP t.93,
+         CALL(
+          NAME malloc,
+          CONST 0,
+          CONST 40)),
+        MOVE(
+         TEMP t.93,
+         ADD(
+          TEMP t.93,
+          CONST 8)),
+        MOVE(
+         MEM(
+          TEMP t.93, 
+          CONST -8, 8),
+         NAME QueensOpen.Queens),
+        MOVE(
+         MEM(
+          TEMP t.93, 
+          CONST 0, 8),
+         CONST 0),
+        MOVE(
+         MEM(
+          TEMP t.93, 
+          CONST 8, 8),
+         CONST 0),
+        MOVE(
+         MEM(
+          TEMP t.93, 
+          CONST 16, 8),
+         CONST 0),
+        MOVE(
+         MEM(
+          TEMP t.93, 
+          CONST 24, 8),
+         CONST 0),
+        TEMP t.93)),
+      MEM(
+       MEM(
+        TEMP t.94, 
+        CONST -8, 8), 
+       CONST 0, 8)),
+     CONST 0,
+     TEMP t.94)),
+   MEM(
+    MEM(
+     TEMP t.95, 
+     CONST -8, 8), 
+    CONST 8, 8)),
+  CONST 0,
+  TEMP t.95,
+  CONST 0))
+# After canonicalization (trees):
+MOVE(
+ TEMP t.93,
+ CALL(
+  NAME malloc,
+  CONST 0,
+  CONST 40))
+MOVE(
+ TEMP t.93,
+ ADD(
+  TEMP t.93,
+  CONST 8))
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST -8, 8),
+ NAME QueensOpen.Queens)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 0, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 8, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 16, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 24, 8),
+ CONST 0)
+MOVE(
+ TEMP t.94,
+ TEMP t.93)
+MOVE(
+ TEMP t.95,
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.94, 
+    CONST -8, 8), 
+   CONST 0, 8),
+  CONST 0,
+  TEMP t.94))
+EXP(
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.95, 
+    CONST -8, 8), 
+   CONST 8, 8),
+  CONST 0,
+  TEMP t.95,
+  CONST 0))
+# Basic Blocks:
+LABEL L.106
+MOVE(
+ TEMP t.93,
+ CALL(
+  NAME malloc,
+  CONST 0,
+  CONST 40))
+MOVE(
+ TEMP t.93,
+ ADD(
+  TEMP t.93,
+  CONST 8))
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST -8, 8),
+ NAME QueensOpen.Queens)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 0, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 8, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 16, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 24, 8),
+ CONST 0)
+MOVE(
+ TEMP t.94,
+ TEMP t.93)
+MOVE(
+ TEMP t.95,
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.94, 
+    CONST -8, 8), 
+   CONST 0, 8),
+  CONST 0,
+  TEMP t.94))
+EXP(
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.95, 
+    CONST -8, 8), 
+   CONST 8, 8),
+  CONST 0,
+  TEMP t.95,
+  CONST 0))
+# Trace Scheduled:
+LABEL L.106
+MOVE(
+ TEMP t.93,
+ CALL(
+  NAME malloc,
+  CONST 0,
+  CONST 40))
+MOVE(
+ TEMP t.93,
+ ADD(
+  TEMP t.93,
+  CONST 8))
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST -8, 8),
+ NAME QueensOpen.Queens)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 0, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 8, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 16, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 24, 8),
+ CONST 0)
+MOVE(
+ TEMP t.94,
+ TEMP t.93)
+MOVE(
+ TEMP t.95,
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.94, 
+    CONST -8, 8), 
+   CONST 0, 8),
+  CONST 0,
+  TEMP t.94))
+EXP(
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.95, 
+    CONST -8, 8), 
+   CONST 8, 8),
+  CONST 0,
+  TEMP t.95,
+  CONST 0))
+# With procedure entry/exit:
+LABEL L.106
+MOVE(
+ TEMP t.93,
+ CALL(
+  NAME malloc,
+  CONST 0,
+  CONST 40))
+MOVE(
+ TEMP t.93,
+ ADD(
+  TEMP t.93,
+  CONST 8))
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST -8, 8),
+ NAME QueensOpen.Queens)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 0, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 8, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 16, 8),
+ CONST 0)
+MOVE(
+ MEM(
+  TEMP t.93, 
+  CONST 24, 8),
+ CONST 0)
+MOVE(
+ TEMP t.94,
+ TEMP t.93)
+MOVE(
+ TEMP t.95,
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.94, 
+    CONST -8, 8), 
+   CONST 0, 8),
+  CONST 0,
+  TEMP t.94))
+EXP(
+ CALL(
+  MEM(
+   MEM(
+    TEMP t.95, 
+    CONST -8, 8), 
+   CONST 8, 8),
+  CONST 0,
+  TEMP t.95,
+  CONST 0))
+# Instructions:
+L.106:	# <- 
+	movabsq $40,t.288	# t.288 <- 
+	movq t.288,%rdi	# %rdi := t.288 
+	call malloc	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- %rdi 
+	movq %rax,t.93	# t.93 := %rax 
+	movq t.93,t.289	# t.289 := t.93 
+	addq $8,t.289	# t.289 <- t.289 
+	movq t.289,t.93	# t.93 := t.289 
+	leaq QueensOpen.Queens(%rip),t.290	# t.290 <- 
+	movq t.290,-8(t.93)	# <- t.290 t.93 
+	movq $0,0(t.93)	# <- t.93 
+	movq $0,8(t.93)	# <- t.93 
+	movq $0,16(t.93)	# <- t.93 
+	movq $0,24(t.93)	# <- t.93 
+	movq t.93,t.94	# t.94 := t.93 
+	movq -8(t.94),t.291	# t.291 <- t.94 
+	movq 0(t.291),t.292	# t.292 <- t.291 
+	movq t.94,%rdi	# %rdi := t.94 
+	call *t.292	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- t.292 %rdi 
+	movq %rax,t.95	# t.95 := %rax 
+	movq -8(t.95),t.293	# t.293 <- t.95 
+	movq 8(t.293),t.294	# t.294 <- t.293 
+	movq t.95,%rdi	# %rdi := t.95 
+	xorq t.295,t.295	# t.295 <- 
+	movq t.295,%rsi	# %rsi := t.295 
+	call *t.294	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- t.294 %rdi %rsi 
+# Control Flow Graph:
+0: t.288 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.93 t.289 t.290 t.94 t.291 t.292 t.95 t.293 t.294 t.295 <- %rsp %rbp ; goto 
+# Interference Graph:
+%rax: 
+%rbx: 
+%rcx: 
+%rdx: 
+%rsp: 
+%rbp: 
+%rsi: 
+%rdi: 
+%r8: 
+%r9: 
+%r10: 
+%r11: 
+%r12: 
+%r13: 
+%r14: 
+%r15: 
+t.288: %rsp %rbp 
+t.93: t.290 %rsp %rbp 
+t.289: %rsp %rbp 
+t.290: %rsp %rbp t.93 
+t.94: t.292 t.291 %rsp %rbp 
+t.291: %rsp %rbp t.94 
+t.292: %rdi %rsp %rbp t.94 
+t.95: t.294 t.293 %rsp %rbp 
+t.293: %rsp %rbp t.95 
+t.294: %rsi t.295 %rdi %rsp %rbp t.95 
+t.295: %rsp %rbp t.294 %rdi 
+%rdi <= t.288
+t.93 <= %rax
+t.289 <= t.93
+t.93 <= t.289
+t.94 <= t.93
+%rdi <= t.94
+t.95 <= %rax
+%rdi <= t.95
+%rsi <= t.295
+# Register Allocation:
+%rax->%rax
+%rbx->%rbx
+%rcx->%rcx
+%rdx->%rdx
+%rsp->%rsp
+%rbp->%rbp
+%rsi->%rsi
+%rdi->%rdi
+%r8->%r8
+%r9->%r9
+%r10->%r10
+%r11->%r11
+%r12->%r12
+%r13->%r13
+%r14->%r14
+%r15->%r15
+t.288->%rdi
+t.93->%rax
+t.289->%rax
+t.290->%rbx
+t.94->%rax
+t.291->%rbx
+t.292->%rbx
+t.95->%rax
+t.293->%rbx
+t.294->%rbx
+t.295->%rsi
+# Assembly code:
+	.text
+QueensOpen:
+	pushq %rbp
+	movq %rsp,%rbp
+	subq $16,%rsp
+	movq %rbx, -8(%rbp)
+L.106:
+	movabsq $40,%rdi
+#	movq %rdi,%rdi
+	call malloc
+#	movq %rax,%rax
+#	movq %rax,%rax
+	addq $8,%rax
+#	movq %rax,%rax
+	leaq QueensOpen.Queens(%rip),%rbx
+	movq %rbx,-8(%rax)
+	movq $0,0(%rax)
+	movq $0,8(%rax)
+	movq $0,16(%rax)
+	movq $0,24(%rax)
+#	movq %rax,%rax
+	movq -8(%rax),%rbx
+	movq 0(%rbx),%rbx
+	movq %rax,%rdi
+	call *%rbx
+#	movq %rax,%rax
+	movq -8(%rax),%rbx
+	movq 8(%rbx),%rbx
+	movq %rax,%rdi
+	xorq %rsi,%rsi
+#	movq %rsi,%rsi
+	call *%rbx
+#	returnSink
+	movq -8(%rbp),%rbx
+	addq $16,%rsp
+	popq %rbp
+	ret
+L.100:
+	call badSub
+END QueensOpen
+PROCEDURE main
+# Before canonicalization (trees):
+EXP(
+ CALL(
+  NAME QueensOpen,
+  CONST 0))
+# After canonicalization (trees):
+EXP(
+ CALL(
+  NAME QueensOpen,
+  CONST 0))
+# Basic Blocks:
+LABEL L.107
+EXP(
+ CALL(
+  NAME QueensOpen,
+  CONST 0))
+# Trace Scheduled:
+LABEL L.107
+EXP(
+ CALL(
+  NAME QueensOpen,
+  CONST 0))
+# With procedure entry/exit:
+LABEL L.107
+EXP(
+ CALL(
+  NAME QueensOpen,
+  CONST 0))
+# Instructions:
+L.107:	# <- 
+	call QueensOpen	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- 
+# Control Flow Graph:
+0: %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- %rsp %rbp ; goto 
+# Interference Graph:
+%rax: 
+%rbx: 
+%rcx: 
+%rdx: 
+%rsp: 
+%rbp: 
+%rsi: 
+%rdi: 
+%r8: 
+%r9: 
+%r10: 
+%r11: 
+%r12: 
+%r13: 
+%r14: 
+%r15: 
+# Register Allocation:
+%rax->%rax
+%rbx->%rbx
+%rcx->%rcx
+%rdx->%rdx
+%rsp->%rsp
+%rbp->%rbp
+%rsi->%rsi
+%rdi->%rdi
+%r8->%r8
+%r9->%r9
+%r10->%r10
+%r11->%r11
+%r12->%r12
+%r13->%r13
+%r14->%r14
+%r15->%r15
+# Assembly code:
+	.globl main
+	.text
+main:
+	pushq %rbp
+	movq %rsp,%rbp
+L.107:
+	call QueensOpen
+#	returnSink
+	popq %rbp
+	ret
+END main
+	.data
+	.balign 8
+L.101:	.asciz	"Attempt to use a null pointer"
+PROCEDURE badPtr
+# Before canonicalization (trees):
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.101)),
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# After canonicalization (trees):
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.101))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# Basic Blocks:
+LABEL L.108
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.101))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# Trace Scheduled:
+LABEL L.108
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.101))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# With procedure entry/exit:
+LABEL L.108
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.101))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# Instructions:
+L.108:	# <- 
+	leaq L.101(%rip),t.296	# t.296 <- 
+	movq t.296,%rdi	# %rdi := t.296 
+	call puts	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- %rdi 
+	movabsq $1,t.297	# t.297 <- 
+	movq t.297,%rdi	# %rdi := t.297 
+	call exit	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- %rdi 
+# Control Flow Graph:
+0: t.296 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.297 <- %rsp %rbp ; goto 
+# Interference Graph:
+%rax: 
+%rbx: 
+%rcx: 
+%rdx: 
+%rsp: 
+%rbp: 
+%rsi: 
+%rdi: 
+%r8: 
+%r9: 
+%r10: 
+%r11: 
+%r12: 
+%r13: 
+%r14: 
+%r15: 
+t.296: %rsp %rbp 
+t.297: %rsp %rbp 
+%rdi <= t.296
+%rdi <= t.297
+# Register Allocation:
+%rax->%rax
+%rbx->%rbx
+%rcx->%rcx
+%rdx->%rdx
+%rsp->%rsp
+%rbp->%rbp
+%rsi->%rsi
+%rdi->%rdi
+%r8->%r8
+%r9->%r9
+%r10->%r10
+%r11->%r11
+%r12->%r12
+%r13->%r13
+%r14->%r14
+%r15->%r15
+t.296->%rdi
+t.297->%rdi
+# Assembly code:
+	.text
+badPtr:
+	pushq %rbp
+	movq %rsp,%rbp
+L.108:
+	leaq L.101(%rip),%rdi
+#	movq %rdi,%rdi
+	call puts
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
+	call exit
+#	returnSink
+	popq %rbp
+	ret
+END badPtr
+	.data
+	.balign 8
+L.102:	.asciz	"Subscript out of bounds"
+PROCEDURE badSub
+# Before canonicalization (trees):
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.102)),
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# After canonicalization (trees):
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.102))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# Basic Blocks:
+LABEL L.109
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.102))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# Trace Scheduled:
+LABEL L.109
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.102))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# With procedure entry/exit:
+LABEL L.109
+EXP(
+ CALL(
+  NAME puts,
+  CONST 0,
+  NAME L.102))
+EXP(
+ CALL(
+  NAME exit,
+  CONST 0,
+  CONST 1))
+# Instructions:
+L.109:	# <- 
+	leaq L.102(%rip),t.298	# t.298 <- 
+	movq t.298,%rdi	# %rdi := t.298 
+	call puts	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- %rdi 
+	movabsq $1,t.299	# t.299 <- 
+	movq t.299,%rdi	# %rdi := t.299 
+	call exit	# %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 <- %rdi 
+# Control Flow Graph:
+0: t.298 %rdi %rsi %rdx %rcx %r8 %r9 %rax %r10 %r11 t.299 <- %rsp %rbp ; goto 
+# Interference Graph:
+%rax: 
+%rbx: 
+%rcx: 
+%rdx: 
+%rsp: 
+%rbp: 
+%rsi: 
+%rdi: 
+%r8: 
+%r9: 
+%r10: 
+%r11: 
+%r12: 
+%r13: 
+%r14: 
+%r15: 
+t.298: %rsp %rbp 
+t.299: %rsp %rbp 
+%rdi <= t.298
+%rdi <= t.299
+# Register Allocation:
+%rax->%rax
+%rbx->%rbx
+%rcx->%rcx
+%rdx->%rdx
+%rsp->%rsp
+%rbp->%rbp
+%rsi->%rsi
+%rdi->%rdi
+%r8->%r8
+%r9->%r9
+%r10->%r10
+%r11->%r11
+%r12->%r12
+%r13->%r13
+%r14->%r14
+%r15->%r15
+t.298->%rdi
+t.299->%rdi
+# Assembly code:
+	.text
+badSub:
+	pushq %rbp
+	movq %rsp,%rbp
+L.109:
+	leaq L.102(%rip),%rdi
+#	movq %rdi,%rdi
+	call puts
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
+	call exit
+#	returnSink
+	popq %rbp
+	ret
+END badSub

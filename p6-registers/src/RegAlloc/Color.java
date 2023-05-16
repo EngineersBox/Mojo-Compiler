@@ -106,7 +106,7 @@ public class Color {
     }
 
     void Build() {
-        // TODO
+        // TODO [DONE?]
     }
 
     void AddEdge(Node u, Node v) {
@@ -123,7 +123,17 @@ public class Color {
     }
 
     void MakeWorkList() {
-        // TODO
+        // TODO [DONE]
+        for (final Node n : this.initial) {
+            SetRem(this.initial, n);
+            if (Degree(n) >= this.K) {
+                SetAdd(this.spillWorklist, n);
+            } else if (MoveRelated(n)) {
+                SetAdd(this.freezeWorklist, n);
+            } else {
+                SetAdd(this.simplifyWorklist, n);
+            }
+        }
     }
 
     /*
@@ -131,8 +141,8 @@ public class Color {
      * removing them from the interference graph.
      */
     LinkedHashSet<Node> Adjacent(Node n) {
-        LinkedHashSet<Node> adj = new LinkedHashSet<Node>(n.succs);
-        adj.removeAll(selectStack);
+        LinkedHashSet<Node> adj = new LinkedHashSet<>(n.succs);
+        selectStack.forEach(adj::remove);
         adj.removeAll(coalescedNodes);
         return adj;
     }
@@ -157,31 +167,238 @@ public class Color {
         return !NodeMoves(n).isEmpty();
     }
 
-    void Simplify() {
-        // TODO
+    private <T> LinkedHashSet<T> union(final T singleton,
+                                       final LinkedHashSet<T> set) {
+        final LinkedHashSet<T> newSet = LinkedHashSet.newLinkedHashSet(1 + set.size());
+        newSet.add(singleton);
+        newSet.addAll(set);
+        return newSet;
     }
 
-    int Degree(Node n) {
-        Integer d = degree.get(n);
-        if (d == null)
-            return 0;
-        return d;
+    private <T> LinkedHashSet<T> union(final Collection<T> setA,
+                                       final Collection<T> setB) {
+        final LinkedHashSet<T> newSet = LinkedHashSet.newLinkedHashSet(
+                (setA == null ? 0 : setA.size())
+                + (setB == null ? 0 : + setB.size())
+        );
+        if (setA != null) newSet.addAll(setA);
+        if (setB != null) newSet.addAll(setB);
+        return newSet;
+    }
+
+    private <T> LinkedList<T> union(final LinkedList<T> listA,
+                                    final LinkedList<T> listB) {
+        final LinkedList<T> newSet = new LinkedList<>();
+        if (listA != null) newSet.addAll(listA);
+        if (listB != null) newSet.addAll(listB);
+        return newSet;
+    }
+
+    private void enableMoves(final LinkedHashSet<Node> nodes) {
+        for (final Node n : nodes) {
+            for (final Move m : NodeMoves(n)) {
+                if (!this.activeMoves.contains(m)) {
+                    continue;
+                }
+                SetRem(this.activeMoves, m);
+                SetAdd(this.worklistMoves, m);
+            }
+        }
+    }
+
+    private void enableMoves(final Node node) {
+        final LinkedHashSet<Node> set = LinkedHashSet.newLinkedHashSet(1);
+        set.add(node);
+        enableMoves(set);
+    }
+
+    private void decrementDegree(final Node m) {
+        final int d = Degree(m);
+        this.degree.put(m, d - 1);
+        if (d != K) {
+            return;
+        }
+        enableMoves(union(m, Adjacent(m)));
+        SetRem(this.spillWorklist, m);
+        if (MoveRelated(m)) {
+            this.freezeWorklist.add(m);
+            SetAdd(this.freezeWorklist, m);
+        } else {
+            SetAdd(this.simplifyWorklist, m);
+        }
+    }
+
+    void Simplify() {
+        // TODO [DONE]
+        final Optional<Node> nOpt = this.simplifyWorklist.stream().findFirst();
+        if (nOpt.isEmpty()) {
+            return;
+        }
+        final Node n = nOpt.get();
+        SetRem(this.simplifyWorklist, n);
+        this.selectStack.push(n);
+        Adjacent(n).forEach(this::decrementDegree);
+    }
+
+    int Degree(final Node n) {
+        return Objects.requireNonNullElse(this.degree.get(n), 0);
+    }
+
+    private void addWorklist(final Node u) {
+        if (this.precolored.contains(u) && !MoveRelated(u) && Degree(u) < this.K) {
+            SetRem(this.freezeWorklist, u);
+            SetAdd(this.simplifyWorklist, u);
+        }
+    }
+
+    private boolean ok(final Node t, final Node r) {
+        return degree.get(t) < this.K
+                || this.precolored.contains(t)
+                || t.adj(r);
+    }
+
+    private boolean allAdjacent(final Node u, final Node v) {
+        return Adjacent(v).stream()
+                .allMatch((final Node t) -> ok(t, u));
+    }
+
+    private boolean conservative(final LinkedHashSet<Node> nodes) {
+        return nodes.stream()
+                .map((final Node n) -> Degree(n) >= this.K ? 1 : 0)
+                .reduce(Integer::sum).get() < this.K;
+    }
+
+    private void combine(final Node u, final Node v) {
+        if (this.freezeWorklist.contains(v)) {
+            SetRem(this.freezeWorklist, v);
+        } else {
+            SetRem(this.spillWorklist, v);
+        }
+        SetAdd(this.coalescedNodes, v);
+        this.alias.put(v, u);
+        this.moveList.put(u, union(
+                this.moveList.get(u),
+                this.moveList.get(v)
+        ));
+        enableMoves(v);
+        for (final Node t : Adjacent(v)) {
+            AddEdge(t, u);
+            decrementDegree(t);
+        }
+        if (Degree(u) >= this.K && this.freezeWorklist.contains(u)) {
+            SetRem(this.freezeWorklist, u);
+            SetAdd(this.spillWorklist, u);
+        }
     }
 
     void Coalesce() {
-        // TODO
+        // TODO [DONE]
+        final Move m = this.worklistMoves.getFirst();
+        final Node x = getAlias(m.src);
+        final Node y = getAlias(m.dst);
+        final Node u;
+        final Node v;
+        if (this.precolored.contains(y)) {
+            u = y;
+            v = x;
+        } else {
+            u = x;
+            v = y;
+        }
+        SetRem(this.worklistMoves, m);
+        if (u.equals(v)) {
+            SetAdd(this.coalescedMoves, m);
+            addWorklist(u);
+        } else if (this.precolored.contains(v) || u.adj(v)) {
+            SetAdd(this.constrainedMoves, m);
+            addWorklist(u);
+            addWorklist(v);
+        } else if (this.precolored.contains(u) && allAdjacent(u, v)
+                || !this.precolored.contains(u) && conservative(union(Adjacent(u), Adjacent(v)))) {
+            SetAdd(this.coalescedMoves, m);
+            combine(u, v);
+            addWorklist(u);
+        } else {
+            SetAdd(this.activeMoves, m);
+        }
+    }
+
+    private void freezeMoves(final Node u) {
+        for (final Move m : NodeMoves(u)) {
+            final Node x = m.src;
+            final Node y = m.dst;
+            final Node yAlias = getAlias(y);
+            final Node v;
+            if (yAlias.equals(getAlias(u))) {
+                v = getAlias(x);
+            } else {
+                v = yAlias;
+            }
+            SetRem(this.activeMoves, m);
+            SetAdd(this.frozenMoves, m);
+            if (this.freezeWorklist.contains(v) && NodeMoves(v).isEmpty()) {
+                SetRem(this.freezeWorklist, v);
+                SetAdd(this.simplifyWorklist, v);
+            }
+        }
     }
 
     void Freeze() {
-        // TODO
+        // TODO [DONE]
+        final Optional<Node> uOpt = this.freezeWorklist.stream().findFirst();
+        if (uOpt.isEmpty()) {
+            return;
+        }
+        final Node u = uOpt.get();
+        SetRem(this.freezeWorklist, u);
+        SetAdd(this.simplifyWorklist, u);
+        freezeMoves(u);
     }
 
     void SelectSpill() {
-        // TODO
+        // TODO [DONE]
+        final Optional<Node> mOpt = this.spillWorklist.stream().findFirst(); // TODO: Heuristic?
+        if (mOpt.isEmpty()) {
+            return;
+        }
+        final Node m = mOpt.get();
+        SetRem(this.spillWorklist, m);
+        SetAdd(this.simplifyWorklist, m);
+        freezeMoves(m);
+    }
+
+    private Node getAlias(final Node n) {
+        if (this.coalescedNodes.contains(n)) {
+            return getAlias(this.alias.get(n));
+        }
+        return n;
     }
 
     void AssignColors() {
-        // TODO
+        // TODO [DONE]
+        Node n;
+        while (!this.selectStack.isEmpty() && (n = this.selectStack.pop()) != null) {
+            final LinkedList<Temp> okColours = new LinkedList<>(this.colors);
+            final LinkedHashSet<Node> nodesColouredPreColoured = union(
+                    this.coloredNodes,
+                    this.precolored
+            );
+            // Node.succs == adjList[n]
+            for (final Node w : n.succs) {
+                final Node wAlias = getAlias(w);
+                if (nodesColouredPreColoured.contains(wAlias)) {
+                    okColours.remove(wAlias.color);
+                }
+            }
+            if (okColours.isEmpty()) {
+                SetAdd(this.spilledNodes, n);
+            } else {
+                SetAdd(this.coloredNodes, n);
+                n.color = okColours.getFirst();
+                System.out.println("=== COLOUR: " + n.color);
+            }
+        }
+        this.coalescedNodes.forEach((final Node node) -> node.color = getAlias(node).color);
     }
 
     private <R> void SetRem(java.util.Collection<R> set, R e) {
@@ -196,8 +413,7 @@ public class Color {
 
     private <R> String Error(R e) {
         String error = "";
-        if (e instanceof Node) {
-            Node n = (Node) e;
+        if (e instanceof Node n) {
             error += n.temp + "(" + Degree(n) + "):";
             if (precolored.contains(n))
                 error += " precolored";
@@ -217,8 +433,7 @@ public class Color {
                 error += " coloredNodes";
             if (selectStack.contains(n))
                 error += " selectStack";
-        } else if (e instanceof Move) {
-            Move m = (Move) e;
+        } else if (e instanceof Move m) {
             error += m.dst + "<=" + m.src + ":";
             if (coalescedMoves.contains(m))
                 error += " coalescedMoves";

@@ -430,18 +430,18 @@ t.0 <= %rax
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.5->%rax
-t.0->%r8
-t.2->%rdi
+t.5->%rdi
+t.0->%rax
+t.2->%r8
 t.1->%rsi
-t.4->%rdx
-t.3->%rcx
-t.7->%rbx
-t.8->%rax
-t.6->%rbx
-t.9->%rax
-t.10->%rax
-t.11->%rax
+t.4->%rdi
+t.3->%rbx
+t.7->%rdx
+t.8->%rcx
+t.6->%rdx
+t.9->%rcx
+t.10->%rbx
+t.11->%rsi
 LocalArrayFixed2d.1.x->%rax
 # Assembly code:
 	.text
@@ -451,42 +451,42 @@ LocalArrayFixed2d:
 	subq $16,%rsp
 	movq %rbx, -8(%rbp)
 L.6:
-	movabsq $400,%rax
-	movq %rax,%rdi
+	movabsq $400,%rdi
+#	movq %rdi,%rdi
 	call malloc
-	movq %rax,%r8
-	movq $10,%rdi
+#	movq %rax,%rax
+	movq $10,%r8
 	xorq %rsi,%rsi
-	cmpq %rdi,%rsi
+	cmpq %r8,%rsi
 	jge L.1
 L.0:
-	movq $5,%rdx
-	xorq %rcx,%rcx
-	cmpq %rdx,%rcx
+	movq $5,%rdi
+	xorq %rbx,%rbx
+	cmpq %rdi,%rbx
 	jge L.3
 L.2:
-	movq %r8,%rbx
-	movq %rsi,%rax
-	imulq $40,%rax
-	addq %rax,%rbx
+	movq %rax,%rdx
+	movq %rsi,%rcx
+	imulq $40,%rcx
+	addq %rcx,%rdx
+#	movq %rdx,%rdx
+	movq %rbx,%rcx
+	shlq $3,%rcx
+	addq %rcx,%rdx
+	movq $0,0(%rdx)
 #	movq %rbx,%rbx
-	movq %rcx,%rax
-	shlq $3,%rax
-	addq %rax,%rbx
-	movq $0,0(%rbx)
-	movq %rcx,%rax
-	addq $1,%rax
-	movq %rax,%rcx
-	cmpq %rdx,%rcx
+	addq $1,%rbx
+#	movq %rbx,%rbx
+	cmpq %rdi,%rbx
 	jl L.2
 L.3:
-	movq %rsi,%rax
-	addq $1,%rax
-	movq %rax,%rsi
-	cmpq %rdi,%rsi
+#	movq %rsi,%rsi
+	addq $1,%rsi
+#	movq %rsi,%rsi
+	cmpq %r8,%rsi
 	jl L.0
 L.1:
-	movq %r8,%rax
+#	movq %rax,%rax
 #	returnSink
 	movq -8(%rbp),%rbx
 	addq $16,%rsp
@@ -683,19 +683,19 @@ t.13: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.12->%rax
-t.13->%rax
+t.12->%rdi
+t.13->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.8:
-	leaq L.4(%rip),%rax
-	movq %rax,%rdi
+	leaq L.4(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -811,19 +811,19 @@ t.15: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.14->%rax
-t.15->%rax
+t.14->%rdi
+t.15->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.9:
-	leaq L.5(%rip),%rax
-	movq %rax,%rdi
+	leaq L.5(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

@@ -87,18 +87,18 @@ t.1: %rsp %rbp %rdi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.0->%rax
-t.1->%rax
+t.0->%rdi
+t.1->%rsi
 # Assembly code:
 	.text
 PrintInt:
 	pushq %rbp
 	movq %rsp,%rbp
 L.4:
-	leaq L.0(%rip),%rax
-	movq %rax,%rdi
-	movabsq $42,%rax
-	movq %rax,%rsi
+	leaq L.0(%rip),%rdi
+#	movq %rdi,%rdi
+	movabsq $42,%rsi
+#	movq %rsi,%rsi
 	call printf
 #	returnSink
 	popq %rbp
@@ -296,19 +296,19 @@ t.3: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.2->%rax
-t.3->%rax
+t.2->%rdi
+t.3->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.6:
-	leaq L.2(%rip),%rax
-	movq %rax,%rdi
+	leaq L.2(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -424,19 +424,19 @@ t.5: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.4->%rax
-t.5->%rax
+t.4->%rdi
+t.5->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.7:
-	leaq L.3(%rip),%rax
-	movq %rax,%rdi
+	leaq L.3(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

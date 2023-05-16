@@ -146,19 +146,17 @@ NotBranch.Not.x <= %rdi
 %r13->%r13
 %r14->%r14
 %r15->%r15
-NotBranch.Not.x->%rbx
+NotBranch.Not.x->%rdi
 t.0->%rax
 # Assembly code:
 	.text
 NotBranch.Not:
 	pushq %rbp
 	movq %rsp,%rbp
-	subq $16,%rsp
-	movq %rbx, -8(%rbp)
-	movq %rdi,%rbx
+#	movq %rdi,%rdi
 L.5:
 	xorq %rax,%rax
-	cmpq %rax,%rbx
+	cmpq %rax,%rdi
 	je L.1
 L.2:
 	xorq %rax,%rax
@@ -167,8 +165,6 @@ L.1:
 	movq $1,%rax
 L.0:
 #	returnSink
-	movq -8(%rbp),%rbx
-	addq $16,%rsp
 	popq %rbp
 	ret
 END NotBranch.Not
@@ -410,19 +406,19 @@ t.2: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.1->%rax
-t.2->%rax
+t.1->%rdi
+t.2->%rdi
 # Assembly code:
 	.text
 badPtr:
 	pushq %rbp
 	movq %rsp,%rbp
 L.7:
-	leaq L.3(%rip),%rax
-	movq %rax,%rdi
+	leaq L.3(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp
@@ -538,19 +534,19 @@ t.4: %rsp %rbp
 %r13->%r13
 %r14->%r14
 %r15->%r15
-t.3->%rax
-t.4->%rax
+t.3->%rdi
+t.4->%rdi
 # Assembly code:
 	.text
 badSub:
 	pushq %rbp
 	movq %rsp,%rbp
 L.8:
-	leaq L.4(%rip),%rax
-	movq %rax,%rdi
+	leaq L.4(%rip),%rdi
+#	movq %rdi,%rdi
 	call puts
-	movabsq $1,%rax
-	movq %rax,%rdi
+	movabsq $1,%rdi
+#	movq %rdi,%rdi
 	call exit
 #	returnSink
 	popq %rbp

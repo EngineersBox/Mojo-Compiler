@@ -5,7 +5,7 @@ prep:
 build:
 	javac -cp bin -d bin src/*/*.java
 clean:
-	rm -rf bin/Assem bin/Canon bin/Mips bin/Translate bin/interp
+	rm -rf bin/Assem bin/Canon bin/Mips bin/Translate bin/interp bin/RegAlloc
 	rm -rf output
 	find . -name "*~" -exec rm {} \;
 
