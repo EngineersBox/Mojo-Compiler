@@ -475,16 +475,16 @@ public class Color {
 
         do {
             if (!simplifyWorklist.isEmpty()) {
-                 System.err.println("Simplify");
+//                 System.err.println("Simplify");
                 Simplify();
             } else if (!worklistMoves.isEmpty()) {
-                 System.err.println("Coalesce");
+//                 System.err.println("Coalesce");
                 Coalesce();
             } else if (!freezeWorklist.isEmpty()) {
-                 System.err.println("Freeze");
+//                 System.err.println("Freeze");
                 Freeze();
             } else if (!spillWorklist.isEmpty()) {
-                 System.err.println("SelectSpill");
+//                 System.err.println("SelectSpill");
                 SelectSpill();
             }
         } while (!(simplifyWorklist.isEmpty() && worklistMoves.isEmpty()
