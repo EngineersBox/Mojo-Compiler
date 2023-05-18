@@ -125,7 +125,6 @@ public class Color {
     void MakeWorkList() {
         // TODO [DONE]
         for (final Node n : this.initial) {
-            // SetRem(this.initial, n);
             if (Degree(n) >= this.K) {
                 SetAdd(this.spillWorklist, n);
             } else if (MoveRelated(n)) {
