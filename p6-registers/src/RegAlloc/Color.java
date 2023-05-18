@@ -358,7 +358,14 @@ public class Color {
 
     void SelectSpill() {
         // TODO [DONE]
-        final Optional<Node> mOpt = this.spillWorklist.stream().findFirst(); // TODO: Heuristic?
+        final Optional<Node> mOpt = this.spillWorklist.stream()
+                .min((final Node a, final Node b) -> {
+                    if (a == null) return 1;
+                    if (b == null) return -1;
+                    final double aHeuristic = a.spillCost / Degree(a);
+                    final double bHeuristic = b.spillCost / Degree(b);
+                    return Double.compare(aHeuristic, bHeuristic);
+                });
         if (mOpt.isEmpty()) {
             return;
         }
