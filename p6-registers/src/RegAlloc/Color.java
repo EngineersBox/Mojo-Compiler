@@ -125,7 +125,7 @@ public class Color {
     void MakeWorkList() {
         // TODO [DONE]
         for (final Node n : this.initial) {
-            SetRem(this.initial, n);
+            // SetRem(this.initial, n);
             if (Degree(n) >= this.K) {
                 SetAdd(this.spillWorklist, n);
             } else if (MoveRelated(n)) {
@@ -134,6 +134,7 @@ public class Color {
                 SetAdd(this.simplifyWorklist, n);
             }
         }
+        this.initial.clear();
     }
 
     /*
@@ -214,7 +215,7 @@ public class Color {
 
     private void decrementDegree(final Node m) {
         final int d = Degree(m);
-        this.degree.put(m, d - 1);
+        this.degree.put(m, Math.max(d - 1, 0));
         if (d != K) {
             return;
         }
@@ -401,12 +402,12 @@ public class Color {
         this.coalescedNodes.forEach((final Node node) -> node.color = getAlias(node).color);
     }
 
-    private <R> void SetRem(java.util.Collection<R> set, R e) {
+    private <R> void SetRem(final Collection<R> set, final R e) {
         if (!set.remove(e))
             Error(e);
     }
 
-    private <R> void SetAdd(java.util.Collection<R> set, R e) {
+    private <R> void SetAdd(final Collection<R> set, final R e) {
         if (!set.add(e))
             Error(e);
     }
@@ -468,16 +469,16 @@ public class Color {
 
         do {
             if (!simplifyWorklist.isEmpty()) {
-                // System.err.println("Simplify");
+                 System.err.println("Simplify");
                 Simplify();
             } else if (!worklistMoves.isEmpty()) {
-                // System.err.println("Coalesce");
+                 System.err.println("Coalesce");
                 Coalesce();
             } else if (!freezeWorklist.isEmpty()) {
-                // System.err.println("Freeze");
+                 System.err.println("Freeze");
                 Freeze();
             } else if (!spillWorklist.isEmpty()) {
-                // System.err.println("SelectSpill");
+                 System.err.println("SelectSpill");
                 SelectSpill();
             }
         } while (!(simplifyWorklist.isEmpty() && worklistMoves.isEmpty()

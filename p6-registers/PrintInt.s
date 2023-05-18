@@ -8,8 +8,8 @@ PrintInt:
 L.4:
 	leaq L.0(%rip),%rax
 	movq %rax,%rdi
-	movabsq $42,t.1
-	movq t.1,%rsi
+	movabsq $42,%rax
+	movq %rax,%rsi
 	call _printf
 #	returnSink
 	popq %rbp
@@ -37,8 +37,8 @@ L.6:
 	leaq L.2(%rip),%rax
 	movq %rax,%rdi
 	call _puts
-	movabsq $1,t.3
-	movq t.3,%rdi
+	movabsq $1,%rax
+	movq %rax,%rdi
 	call _exit
 #	returnSink
 	popq %rbp
@@ -54,8 +54,8 @@ L.7:
 	leaq L.3(%rip),%rax
 	movq %rax,%rdi
 	call _puts
-	movabsq $1,t.5
-	movq t.5,%rdi
+	movabsq $1,%rax
+	movq %rax,%rdi
 	call _exit
 #	returnSink
 	popq %rbp
