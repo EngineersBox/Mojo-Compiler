@@ -106,7 +106,18 @@ public class Color {
     }
 
     void Build() {
-        // TODO [DONE?]
+        // TODO [DONE]
+        for (final Move m : ig.moves()) {
+            this.moveList.computeIfAbsent(
+                    m.src,
+                    (final Node n) -> new LinkedList<>()
+            ).add(m);
+            this.moveList.computeIfAbsent(
+                    m.dst,
+                    (final Node n) -> new LinkedList<>()
+            ).add(m);
+            this.worklistMoves.add(m);
+        }
     }
 
     void AddEdge(Node u, Node v) {
@@ -221,7 +232,6 @@ public class Color {
         enableMoves(union(m, Adjacent(m)));
         SetRem(this.spillWorklist, m);
         if (MoveRelated(m)) {
-            this.freezeWorklist.add(m);
             SetAdd(this.freezeWorklist, m);
         } else {
             SetAdd(this.simplifyWorklist, m);
@@ -245,14 +255,14 @@ public class Color {
     }
 
     private void addWorklist(final Node u) {
-        if (this.precolored.contains(u) && !MoveRelated(u) && Degree(u) < this.K) {
+        if (!this.precolored.contains(u) && !MoveRelated(u) && Degree(u) < this.K) {
             SetRem(this.freezeWorklist, u);
             SetAdd(this.simplifyWorklist, u);
         }
     }
 
     private boolean ok(final Node t, final Node r) {
-        return degree.get(t) < this.K
+        return Degree(t) < this.K
                 || this.precolored.contains(t)
                 || t.adj(r);
     }
@@ -309,12 +319,12 @@ public class Color {
         if (u.equals(v)) {
             SetAdd(this.coalescedMoves, m);
             addWorklist(u);
-        } else if (this.precolored.contains(v) || u.adj(v)) {
+        } else if (this.precolored.contains(v) || u.adj(v) || v.adj(u)) {
             SetAdd(this.constrainedMoves, m);
             addWorklist(u);
             addWorklist(v);
-        } else if (this.precolored.contains(u) && allAdjacent(u, v)
-                || !this.precolored.contains(u) && conservative(union(Adjacent(u), Adjacent(v)))) {
+        } else if ((this.precolored.contains(u) && allAdjacent(u, v))
+                || (!this.precolored.contains(u) && conservative(union(Adjacent(u), Adjacent(v))))) {
             SetAdd(this.coalescedMoves, m);
             combine(u, v);
             addWorklist(u);
