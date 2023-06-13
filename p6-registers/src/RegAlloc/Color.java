@@ -121,16 +121,17 @@ public class Color {
     }
 
     void AddEdge(Node u, Node v) {
-        if (u != v && !u.adj(v)) {
-            if (!precolored.contains(u)) {
-                ig.addEdge(u, v);
-                degree.put(u, Degree(u) + 1);
-            }
-            if (!precolored.contains(v)) {
-                ig.addEdge(v, u);
-                degree.put(v, Degree(v) + 1);
-            }
-        }
+		if (u == v || u.adj(v)) {
+			return;
+		}
+		if (!precolored.contains(u)) {
+			ig.addEdge(u, v);
+			degree.put(u, Degree(u) + 1);
+		}
+		if (!precolored.contains(v)) {
+			ig.addEdge(v, u);
+			degree.put(v, Degree(v) + 1);
+		}
     }
 
     void MakeWorkList() {
@@ -231,11 +232,10 @@ public class Color {
         }
         enableMoves(union(m, Adjacent(m)));
         SetRem(this.spillWorklist, m);
-        if (MoveRelated(m)) {
-            SetAdd(this.freezeWorklist, m);
-        } else {
-            SetAdd(this.simplifyWorklist, m);
-        }
+		SetAdd(
+			MoveRelated(m) ? this.freezeWorklist : this.simplifyWorklist,
+			m
+		);
     }
 
     void Simplify() {
@@ -255,10 +255,15 @@ public class Color {
     }
 
     private void addWorklist(final Node u) {
-        if (!this.precolored.contains(u) && !MoveRelated(u) && Degree(u) < this.K) {
-            SetRem(this.freezeWorklist, u);
-            SetAdd(this.simplifyWorklist, u);
-        }
+		if (this.precolored.contains(u) || MoveRelated(u) || Degree(u) >= this.K) {
+			return;
+		}
+		SetRem(this.freezeWorklist, u);
+		SetAdd(this.simplifyWorklist, u);
+        //if (!this.precolored.contains(u) && !MoveRelated(u) && Degree(u) < this.K) {
+            //SetRem(this.freezeWorklist, u);
+            //SetAdd(this.simplifyWorklist, u);
+        //}
     }
 
     private boolean ok(final Node t, final Node r) {
@@ -279,11 +284,10 @@ public class Color {
     }
 
     private void combine(final Node u, final Node v) {
-        if (this.freezeWorklist.contains(v)) {
-            SetRem(this.freezeWorklist, v);
-        } else {
-            SetRem(this.spillWorklist, v);
-        }
+		SetRem(
+			this.freezeWorklist.contains(v) ? this.freezeWorklist : this.spillWorklist,
+			v
+		);
         SetAdd(this.coalescedNodes, v);
         this.alias.put(v, u);
         this.moveList.put(u, union(
@@ -338,12 +342,7 @@ public class Color {
             final Node x = m.src;
             final Node y = m.dst;
             final Node yAlias = getAlias(y);
-            final Node v;
-            if (yAlias.equals(getAlias(u))) {
-                v = getAlias(x);
-            } else {
-                v = yAlias;
-            }
+            final Node v = yAlias.equals(getAlias(u)) ? getAlias(x) : yAlias;
             SetRem(this.activeMoves, m);
             SetAdd(this.frozenMoves, m);
             if (this.freezeWorklist.contains(v) && NodeMoves(v).isEmpty()) {
